@@ -52,6 +52,7 @@ minecraft {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.19.2-43.2.0'
+    compileOnly files('libs/tacz-1.19.2-1.1.4-hotfix-all.jar')
 }
 
 tasks.withType(JavaCompile).configureEach {

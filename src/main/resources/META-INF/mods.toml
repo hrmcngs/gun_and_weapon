@@ -17,6 +17,13 @@ authors="hrmcn, MCreator"
     ordering="NONE"
     side="BOTH"
 
+[[dependencies.gun_and_weapon]]
+    modId="tacz"
+    mandatory=true
+    versionRange="[1.1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
 
 
 

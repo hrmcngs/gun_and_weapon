@@ -1,1 +1,6 @@
-{}
+{
+  "item.gun_and_weapon.gunblade_sword": "Gunblade (Melee Mode)",
+  "itemGroup.gun_and_weapon": "Gunblade",
+  "key.categories.gun_and_weapon": "Gunblade",
+  "key.gun_and_weapon.mode_switch": "Switch Gunblade Mode"
+}
