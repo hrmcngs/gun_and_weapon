@@ -30,7 +30,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.FriendlyByteBuf;
 
 import gun_and_weapon.init.GunAndWeaponItems;
+import gun_and_weapon.init.GunAndWeaponTabs;
 import gun_and_weapon.network.ModeSwitchMessage;
+
+import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,8 +59,9 @@ public class GunAndWeaponMod {
 
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
-		// Register items
+		// Register items and creative tabs
 		GunAndWeaponItems.REGISTRY.register(bus);
+		GunAndWeaponTabs.REGISTRY.register(bus);
 
 		// Register network messages
 		addNetworkMessage(ModeSwitchMessage.class,
@@ -100,12 +104,13 @@ public class GunAndWeaponMod {
 
 	private void installGunPack() {
 		try {
-			Path gameDir = Path.of(System.getProperty("user.dir"));
+			Path gameDir = FMLPaths.GAMEDIR.get();
 			Path taczDir = gameDir.resolve("tacz");
 			Path packDir = taczDir.resolve("gunblade_pack");
 
-			if (Files.exists(packDir.resolve("gunpack.meta.json"))) {
-				LOGGER.info("Gunblade gun pack already installed");
+			Path versionMarker = packDir.resolve(".version_1.0.2");
+			if (Files.exists(versionMarker)) {
+				LOGGER.info("Gunblade gun pack already installed (v1.0.2)");
 				return;
 			}
 
@@ -120,7 +125,7 @@ public class GunAndWeaponMod {
 					"assets/tacz/textures/gun/uv/gunblade.png",
 					"assets/tacz/lang/en_us.json",
 					"assets/tacz/lang/ja_jp.json",
-					"data/tacz/custom/guns/gun_and_weapon/gunblade.json",
+					"data/tacz/custom/guns/tacz/gunblade.json",
 					"data/tacz/data/guns/gunblade_data.json",
 					"data/tacz/recipes/gun/gunblade.json"
 			};
@@ -137,6 +142,7 @@ public class GunAndWeaponMod {
 				}
 			}
 
+			Files.writeString(versionMarker, "1.0.2");
 			LOGGER.info("Gunblade gun pack installed to: " + packDir);
 		} catch (IOException e) {
 			LOGGER.error("Failed to install gunblade gun pack", e);

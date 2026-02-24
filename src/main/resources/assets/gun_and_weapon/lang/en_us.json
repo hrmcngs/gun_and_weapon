@@ -1,6 +1,6 @@
 {
   "item.gun_and_weapon.gunblade_sword": "Gunblade",
-  "itemGroup.gun_and_weapon": "Gunblade",
-  "key.categories.gun_and_weapon": "Gunblade",
-  "key.gun_and_weapon.mode_switch": "Switch Gunblade Mode"
+  "itemGroup.gun_and_weapon": "Gun & Weapon",
+  "key.gun_and_weapon.mode_switch": "Gunblade Mode Switch",
+  "key.categories.gun_and_weapon": "Gun & Weapon"
 }

@@ -1,28 +1,33 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-    }
+plugins {
+    id 'eclipse'
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
 
 version = '1.0'
 group = 'com.yourname.modid'
-archivesBaseName = 'modid'
+archivesBaseName = 'gun_and_weapon'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    mappings channel: 'official', version: '1.19.2'
+    mappings channel: 'official', version: '1.20.1'
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
+    copyIdeResources = true
+
     runs {
         client {
+            def mcreatorJvmOptions = System.getenv('MCREATOR_JVM_OPTIONS')
+            if (mcreatorJvmOptions) {
+                jvmArgs += mcreatorJvmOptions.split("\\s+").findAll { it.trim() }.toList()
+            }
+        }
+
+        server {
+        }
+
+        configureEach {
             workingDirectory project.file('run')
 
             property 'forge.logging.markers', 'REGISTRIES'
@@ -34,25 +39,23 @@ minecraft {
                 }
             }
         }
+    }
+}
 
-        server {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
+repositories {
+    maven {
+        name = "Curse Maven"
+        url = "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
         }
     }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.2-43.2.0'
-    compileOnly files('libs/tacz-1.19.2-1.1.4-hotfix-all.jar')
+    minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
+    // TaCZ 1.20.1-1.1.7-hotfix
+    implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:7401617")
 }
 
 tasks.withType(JavaCompile).configureEach {

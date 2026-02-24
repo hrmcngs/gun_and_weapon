@@ -1,8 +1,11 @@
 # Build output
-build/
+build/*
+!build/libs/
+build/libs/*
+!build/libs/*.jar
 run/
 .gradle/
-libs/
+/libs/
 
 # Compiled class file
 *.class
@@ -18,6 +21,7 @@ libs/
 
 # Package Files #
 *.jar
+!build/libs/*.jar
 *.war
 *.nar
 *.ear

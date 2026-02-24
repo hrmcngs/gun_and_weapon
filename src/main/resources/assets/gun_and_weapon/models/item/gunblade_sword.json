@@ -1,6 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "gun_and_weapon:items/gunblade_sword"
+    "layer0": "gun_and_weapon:item/gunblade_sword"
   }
 }

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.neoforged.net)",
+      "Bash(git check-ignore:*)",
+      "WebFetch(domain:www.cursemaven.com)",
+      "WebFetch(domain:www.curseforge.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:9minecraft.net)",
+      "WebFetch(domain:minecraft-guides.com)",
+      "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-17\" \"$JAVA_HOME/bin/java\":*)"
+    ]
+  }
+}

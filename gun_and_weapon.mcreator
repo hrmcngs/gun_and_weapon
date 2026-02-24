@@ -2,6 +2,8 @@
   "mod_elements": [],
   "variable_elements": [],
   "sound_elements": [],
+  "tag_elements": {},
+  "tab_element_order": {},
   "language_map": {
     "en_us": {}
   },
@@ -16,15 +18,13 @@
     "author": "hrmcn, MCreator",
     "websiteURL": "https://mcreator.net",
     "license": "Academic Free License v3.0",
-    "disableForgeVersionCheck": true,
     "serverSideOnly": false,
     "requiredMods": [],
     "dependencies": [],
     "dependants": [],
     "mcreatorDependencies": [],
-    "currentGenerator": "forge-1.19.2",
-    "modElementsPackage": "gun_and_weapon",
-    "lockBaseModFiles": false
+    "currentGenerator": "forge-1.20.1",
+    "modElementsPackage": "gun_and_weapon"
   },
-  "mcreatorVersion": 202300224119
+  "mcreatorVersion": 202400452410
 }

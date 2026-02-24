@@ -1,9 +1,0 @@
-{
-  "name": "gunblade",
-  "tooltip": "key.gun_and_weapon.gunblade.tooltip",
-  "display": "tacz:gunblade_display",
-  "data": "tacz:gunblade_data",
-  "type": "pistol",
-  "itemType": "modern_kinetic",
-  "sort": 1
-}

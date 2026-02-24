@@ -26,13 +26,9 @@ public class GunbladeEventHandler {
 		ItemStack gunStack = event.getGunItemStack();
 		IGun iGun = IGun.getIGunOrNull(gunStack);
 		if (iGun == null) return;
+		if (!GUNBLADE_GUN_ID.equals(iGun.getGunId(gunStack))) return;
 
-		ResourceLocation gunId = iGun.getGunId(gunStack);
-		if (!GUNBLADE_GUN_ID.equals(gunId)) return;
-
-		// Sync ammo count to persistent data for mode switching
 		CompoundTag data = player.getPersistentData();
-		int currentAmmo = iGun.getCurrentAmmoCount(gunStack);
-		data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, currentAmmo);
+		data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, iGun.getCurrentAmmoCount(gunStack));
 	}
 }

@@ -22,24 +22,17 @@ public class ModeSwitchMessage {
 
 	private static final ResourceLocation GUNBLADE_GUN_ID = new ResourceLocation("tacz", "gunblade");
 
-	public ModeSwitchMessage() {
-	}
-
-	public ModeSwitchMessage(FriendlyByteBuf buf) {
-	}
-
-	public void encode(FriendlyByteBuf buf) {
-	}
+	public ModeSwitchMessage() {}
+	public ModeSwitchMessage(FriendlyByteBuf buf) {}
+	public void encode(FriendlyByteBuf buf) {}
 
 	public void handle(Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Player player = ctx.get().getSender();
 			if (player == null) return;
-
 			ItemStack mainHand = player.getMainHandItem();
-
 			if (mainHand.getItem() == GunAndWeaponItems.GUNBLADE_SWORD.get()) {
-				switchToRangedMode(player, mainHand);
+				switchToRangedMode(player);
 			} else if (isGunbladeGun(mainHand)) {
 				switchToMeleeMode(player, mainHand);
 			}
@@ -47,72 +40,45 @@ public class ModeSwitchMessage {
 		ctx.get().setPacketHandled(true);
 	}
 
-	private void switchToRangedMode(Player player, ItemStack swordStack) {
+	private void switchToRangedMode(Player player) {
 		CompoundTag data = player.getPersistentData();
 		int ammo = data.getInt(GunbladeSwordItem.TAG_AMMO_COUNT);
-
 		ItemStack gunStack = createGunbladeGunStack(ammo);
 		if (gunStack.isEmpty()) return;
-
-		int slot = player.getInventory().selected;
-		player.getInventory().setItem(slot, gunStack);
-
+		player.getInventory().setItem(player.getInventory().selected, gunStack);
 		data.putString(GunbladeSwordItem.TAG_MODE, "ranged");
-
-		player.level.playSound(null, player.blockPosition(),
-				SoundEvents.IRON_DOOR_OPEN, SoundSource.PLAYERS, 0.5f, 1.5f);
+		player.level().playSound(null, player.blockPosition(), SoundEvents.IRON_DOOR_OPEN, SoundSource.PLAYERS, 0.5f, 1.5f);
 	}
 
 	private void switchToMeleeMode(Player player, ItemStack gunStack) {
-		int ammo = readGunAmmo(gunStack);
-
 		CompoundTag data = player.getPersistentData();
-		data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, ammo);
-
-		ItemStack swordStack = new ItemStack(GunAndWeaponItems.GUNBLADE_SWORD.get());
-
-		int slot = player.getInventory().selected;
-		player.getInventory().setItem(slot, swordStack);
-
+		data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, readGunAmmo(gunStack));
+		player.getInventory().setItem(player.getInventory().selected, new ItemStack(GunAndWeaponItems.GUNBLADE_SWORD.get()));
 		data.putString(GunbladeSwordItem.TAG_MODE, "melee");
 		data.putInt(GunbladeSwordItem.TAG_CHARGE_TICKS, 0);
-
-		player.level.playSound(null, player.blockPosition(),
-				SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 0.5f, 1.5f);
+		player.level().playSound(null, player.blockPosition(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 0.5f, 1.5f);
 	}
 
 	private boolean isGunbladeGun(ItemStack stack) {
 		try {
 			IGun iGun = IGun.getIGunOrNull(stack);
-			if (iGun != null) {
-				ResourceLocation gunId = iGun.getGunId(stack);
-				return GUNBLADE_GUN_ID.equals(gunId);
-			}
-		} catch (NoClassDefFoundError ignored) {
-		}
+			if (iGun != null) return GUNBLADE_GUN_ID.equals(iGun.getGunId(stack));
+		} catch (NoClassDefFoundError ignored) {}
 		return false;
 	}
 
 	private ItemStack createGunbladeGunStack(int ammo) {
 		try {
-			return GunItemBuilder.create()
-					.setId(GUNBLADE_GUN_ID)
-					.setAmmoCount(ammo)
-					.setFireMode(FireMode.SEMI)
-					.build();
-		} catch (NoClassDefFoundError ignored) {
-		}
+			return GunItemBuilder.create().setId(GUNBLADE_GUN_ID).setAmmoCount(ammo).setFireMode(FireMode.SEMI).build();
+		} catch (NoClassDefFoundError ignored) {}
 		return ItemStack.EMPTY;
 	}
 
 	private int readGunAmmo(ItemStack gunStack) {
 		try {
 			IGun iGun = IGun.getIGunOrNull(gunStack);
-			if (iGun != null) {
-				return iGun.getCurrentAmmoCount(gunStack);
-			}
-		} catch (NoClassDefFoundError ignored) {
-		}
+			if (iGun != null) return iGun.getCurrentAmmoCount(gunStack);
+		} catch (NoClassDefFoundError ignored) {}
 		return 0;
 	}
 }

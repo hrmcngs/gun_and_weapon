@@ -1,29 +1,33 @@
 modLoader="javafml"
-loaderVersion="[43,)"
+loaderVersion="[47,)"
 license="Academic Free License v3.0"
 
 [[mods]]
 modId="gun_and_weapon"
 version="1.0.0"
 displayName="gun and weapon"
-credits="Created using mod maker MCreator - https://mcreator.net/about"
 displayURL="https://mcreator.net"
+credits="Created using mod maker MCreator - https://mcreator.net/about"
 authors="hrmcn, MCreator"
+
+# Start of user code block mod configuration
+# End of user code block mod configuration
 
 [[dependencies.gun_and_weapon]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19.2]"
-    ordering="NONE"
-    side="BOTH"
-
-[[dependencies.gun_and_weapon]]
-    modId="tacz"
-    mandatory=true
-    versionRange="[1.1.0,)"
+    versionRange="[1.20.1]"
     ordering="AFTER"
     side="BOTH"
 
 
 
 
+# Start of user code block dependencies configuration
+[[dependencies.gun_and_weapon]]
+    modId="tacz"
+    mandatory=true
+    versionRange="[1.1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+# End of user code block dependencies configuration

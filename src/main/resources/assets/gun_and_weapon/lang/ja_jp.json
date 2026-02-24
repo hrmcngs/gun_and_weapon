@@ -1,6 +1,6 @@
 {
   "item.gun_and_weapon.gunblade_sword": "\u30ac\u30f3\u30d6\u30ec\u30fc\u30c9",
-  "itemGroup.gun_and_weapon": "\u30ac\u30f3\u30d6\u30ec\u30fc\u30c9",
-  "key.categories.gun_and_weapon": "\u30ac\u30f3\u30d6\u30ec\u30fc\u30c9",
-  "key.gun_and_weapon.mode_switch": "\u30ac\u30f3\u30d6\u30ec\u30fc\u30c9\u30e2\u30fc\u30c9\u5207\u66ff"
+  "itemGroup.gun_and_weapon": "Gun & Weapon",
+  "key.gun_and_weapon.mode_switch": "\u30ac\u30f3\u30d6\u30ec\u30fc\u30c9 \u30e2\u30fc\u30c9\u5207\u66ff",
+  "key.categories.gun_and_weapon": "Gun & Weapon"
 }
