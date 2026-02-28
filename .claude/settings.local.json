@@ -12,11 +12,22 @@
       "Bash(JAVA_HOME=\"C:/Program Files/Java/jdk-17\" \"$JAVA_HOME/bin/java\":*)",
       "Bash(curl -L -o craftsman_rp.zip \"https://drive.google.com/uc?export=download&id=17086XjmtiWwn-5xBAxL1H6BdPOEofpyE\")",
       "Bash(\"C:/Program Files/Java/jdk-17/bin/javac\" ConvertModel.java)",
-      "Bash(\"C:/Program Files/Java/jdk-17/bin/java\" ConvertModel)"
+      "Bash(\"C:/Program Files/Java/jdk-17/bin/java\" ConvertModel)",
+      "Bash(stat \"/c/Users/hrmcn/Downloads/craftsman_rp_extract/assets/minecraft/models/item/3dmodel/weapon/craftsman_gunblade/\"*.json)",
+      "Bash(wc -l \"/c/Users/hrmcn/Downloads/craftsman_rp_extract/assets/minecraft/models/item/3dmodel/weapon/craftsman_gunblade/\"*.json)",
+      "Bash(\"C:/Program Files/Java/jdk-17/bin/javac\" ConvertAll.java)",
+      "Bash(\"C:/Program Files/Java/jdk-17/bin/java\" ConvertAll)",
+      "Bash(chmod +x \"c:/Users/hrmcn/MCreatorWorkspaces/craftsman_arms_tacz/build.sh\" \"c:/Users/hrmcn/MCreatorWorkspaces/craftsman_arms_tacz/test.sh\" \"c:/Users/hrmcn/MCreatorWorkspaces/craftsman_arms_tacz/gradlew\")",
+      "Bash(chmod +x \"c:/Users/hrmcn/MCreatorWorkspaces/gun_and_weapon/build.sh\" \"c:/Users/hrmcn/MCreatorWorkspaces/gun_and_weapon/test.sh\")",
+      "Read(//c/Program Files \\(x86\\)/**)"
     ],
     "additionalDirectories": [
       "c:\\Users\\hrmcn\\MCreatorWorkspaces\\extra_video_settings\\gradle",
-      "c:\\Users\\hrmcn\\MCreatorWorkspaces\\extra_video_settings"
+      "c:\\Users\\hrmcn\\MCreatorWorkspaces\\extra_video_settings",
+      "C:\\Users\\hrmcn\\MCreatorWorkspaces\\gun_and_weapon\\$BASE\\gradle",
+      "c:\\Users\\hrmcn\\MCreatorWorkspaces\\craftsman_arms_tacz\\gradle\\wrapper",
+      "c:\\Users\\hrmcn\\MCreatorWorkspaces\\craftsman_arms_tacz",
+      "C:\\Users\\hrmcn\\Downloads\\craftsman_rp_full\\$TEX_SRC\\craftsman_arms"
     ]
   }
 }
