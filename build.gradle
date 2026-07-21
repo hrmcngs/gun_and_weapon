@@ -9,6 +9,36 @@ archivesBaseName = 'gun_and_weapon'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+// =====================================================================
+// 本体MOD「The four primitives and Weapons」jar の自動取り込み
+//   ~/The-four-primitives-and-Weapons/build/libs から最新jarを
+//   libs/local/ にコピーする (addons-Sample と同じ方式)。
+//   他環境では gradle.properties の mawSourceProject で上書き可能。
+// =====================================================================
+def maw_artifact = 'the_four_primitives_and_weapons'
+def maw_version  = '1.20.1-local'
+def mawSourceProject = project.findProperty('mawSourceProject')
+        ?: "${System.getProperty('user.home')}/The-four-primitives-and-Weapons"
+def mawDestDir  = file("libs/local/${maw_artifact}/${maw_version}")
+def mawDestFile = new File(mawDestDir, "${maw_artifact}-${maw_version}.jar")
+def mawSourceJarDir = file("${mawSourceProject}/build/libs")
+if (mawSourceJarDir.exists()) {
+    def latestJar = mawSourceJarDir.listFiles()
+            .findAll { it.name.endsWith('.jar') &&
+                       !it.name.contains('-sources') &&
+                       !it.name.contains('-dev') &&
+                       !it.name.contains('-javadoc') }
+            .max { it.lastModified() }
+    if (latestJar != null && (!mawDestFile.exists() || latestJar.lastModified() > mawDestFile.lastModified())) {
+        mawDestDir.mkdirs()
+        mawDestFile.bytes = latestJar.bytes
+        println "[addon] 本体MOD jar を取り込みました: ${latestJar.name} → ${mawDestFile.name}"
+    }
+} else if (!mawDestFile.exists()) {
+    logger.warn("[addon] 本体MOD ソース ${mawSourceProject} が見つからず、libs/local にもjarが無い。")
+    logger.warn("[addon] libs/local/${maw_artifact}/${maw_version}/ に手動でjarを置いてください。")
+}
+
 minecraft {
     mappings channel: 'official', version: '1.20.1'
 
@@ -44,6 +74,12 @@ minecraft {
 }
 
 repositories {
+    // libs/ をローカルMavenリポジトリとして扱う（本体MOD jar 用）
+    //   配置: libs/local/<name>/<version>/<name>-<version>.jar
+    maven {
+        url = file('libs').toURI()
+        metadataSources { artifact() }
+    }
     maven {
         name = "Curse Maven"
         url = "https://www.cursemaven.com"
@@ -51,12 +87,25 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    // Curios — TheIllusiveC4 公式 Maven (本体MOD準拠)
+    maven { url 'https://maven.theillusivec4.top/' }
+    // GeckoLib — Cloudsmith Maven (本体MOD準拠)
+    maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
     // TaCZ 1.20.1-1.1.7-hotfix
     implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:7401617")
+
+    // 本体MOD「The four primitives and Weapons」(libs/local から取り込み)
+    // 統合はデータ駆動 (weapon_types / weapon_stats JSON) なのでコンパイルには
+    // 不要だが、dev実行時にロードさせるため runtimeOnly で乗せる。
+    runtimeOnly fg.deobf("local:${maw_artifact}:${maw_version}")
+
+    // 本体MODの前提 — dev実行時のランタイム用 (本体MODの任意依存)
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.10.0+1.20.1")
+    runtimeOnly fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:4.7.3")
 }
 
 tasks.withType(JavaCompile).configureEach {

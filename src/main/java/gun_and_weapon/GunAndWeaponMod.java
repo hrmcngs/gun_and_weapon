@@ -108,9 +108,9 @@ public class GunAndWeaponMod {
 			Path taczDir = gameDir.resolve("tacz");
 			Path packDir = taczDir.resolve("gunblade_pack");
 
-			Path versionMarker = packDir.resolve(".version_1.0.5");
+			Path versionMarker = packDir.resolve(".version_1.1.0");
 			if (Files.exists(versionMarker)) {
-				LOGGER.info("Gunblade gun pack already installed (v1.0.5)");
+				LOGGER.info("Gunblade gun pack already installed (v1.1.0)");
 				return;
 			}
 
@@ -142,7 +142,7 @@ public class GunAndWeaponMod {
 				}
 			}
 
-			Files.writeString(versionMarker, "1.0.5");
+			Files.writeString(versionMarker, "1.1.0");
 			LOGGER.info("Gunblade gun pack installed to: " + packDir);
 		} catch (IOException e) {
 			LOGGER.error("Failed to install gunblade gun pack", e);

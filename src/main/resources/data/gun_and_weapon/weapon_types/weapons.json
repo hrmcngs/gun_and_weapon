@@ -1,0 +1,33 @@
+{
+  "_comment": [
+    "gun_and_weapon — 武器タイプ宣言ファイル",
+    "本体MOD「The four primitives and Weapons」の WeaponTypeRegistry が自動的に読み込む。",
+    "",
+    "ガンブレード(近接モード)を独自タイプ 'gunblade' として登録する。",
+    "右クリック(バレットステップ)とスニーク(チャージ)は本MODのJava側で",
+    "実装済みのため、right_click / shift_right_click は none を既定にする。"
+  ],
+
+  "types": {
+
+    "gunblade": {
+      "display_name": "ガンブレード",
+      "items": [
+        "gun_and_weapon:gunblade_sword"
+      ],
+      "motions": {
+        "combat": ["thrust", "upper_left_slash", "upper_right_slash", "horizontal_slash", "spin_slash"],
+        "dash": ["dash_rush", "leap_slash"],
+        "right_click": ["none_right"],
+        "shift_right_click": ["none_shift"]
+      },
+      "default_motions": {
+        "first_hit": "upper_right_slash",
+        "second_hit": "upper_left_slash",
+        "third_hit": "thrust",
+        "charged": "spin_slash"
+      }
+    }
+
+  }
+}

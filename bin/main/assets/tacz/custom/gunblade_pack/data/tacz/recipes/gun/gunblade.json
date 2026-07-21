@@ -1,0 +1,21 @@
+{
+  "materials": [
+    {
+      "item": { "tag": "forge:ingots/iron" },
+      "count": 24
+    },
+    {
+      "item": { "item": "minecraft:diamond" },
+      "count": 2
+    },
+    {
+      "item": { "item": "minecraft:gunpowder" },
+      "count": 4
+    }
+  ],
+  "result": {
+    "type": "gun",
+    "id": "tacz:gunblade"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

@@ -30,12 +30,4 @@ authors="hrmcn, MCreator"
     versionRange="[1.1.0,)"
     ordering="AFTER"
     side="BOTH"
-
-# 本体: The four primitives and Weapons（必須依存 — このMODはそのアドオン）
-[[dependencies.gun_and_weapon]]
-    modId="the_four_primitives_and_weapons"
-    mandatory=true
-    versionRange="[1.0.0,)"
-    ordering="AFTER"
-    side="BOTH"
 # End of user code block dependencies configuration
