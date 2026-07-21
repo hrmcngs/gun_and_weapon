@@ -1,4 +1,4 @@
 {
   "tacz.gun.gun_and_weapon.gunblade.name": "ガンブレード（射撃モード）",
-  "tacz.gun.gun_and_weapon.gunblade.desc": "刃に銃火器を内蔵。[V]で近接モードに切替。"
+  "tacz.gun.gun_and_weapon.gunblade.desc": "刃に銃火器を内蔵。弾倉満タンで[R]（またはスニーク+[R]）で近接モードに切替。"
 }

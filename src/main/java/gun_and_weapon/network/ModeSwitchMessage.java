@@ -42,9 +42,14 @@ public class ModeSwitchMessage {
 
 	private void switchToRangedMode(Player player) {
 		CompoundTag data = player.getPersistentData();
-		int ammo = data.getInt(GunbladeSwordItem.TAG_AMMO_COUNT);
+		int ammo = Math.max(0, Math.min(data.getInt(GunbladeSwordItem.TAG_AMMO_COUNT), GunbladeSwordItem.MAX_AMMO));
 		ItemStack gunStack = createGunbladeGunStack(ammo);
-		if (gunStack.isEmpty()) return;
+		if (gunStack.isEmpty()) {
+			// ガンパックが読み込まれていない (gun index 未登録) 場合は切り替えない
+			player.displayClientMessage(
+					net.minecraft.network.chat.Component.translatable("message.gun_and_weapon.gun_pack_missing"), true);
+			return;
+		}
 		player.getInventory().setItem(player.getInventory().selected, gunStack);
 		data.putString(GunbladeSwordItem.TAG_MODE, "ranged");
 		player.level().playSound(null, player.blockPosition(), SoundEvents.IRON_DOOR_OPEN, SoundSource.PLAYERS, 0.5f, 1.5f);
@@ -68,6 +73,12 @@ public class ModeSwitchMessage {
 
 	private ItemStack createGunbladeGunStack(int ammo) {
 		try {
+			// ガンパックが読み込まれ gun index が登録されているか確認。
+			// 未登録のまま組み立てると「不明な銃」アイテムになってしまう。
+			if (com.tacz.guns.api.TimelessAPI.getCommonGunIndex(GUNBLADE_GUN_ID).isEmpty()) {
+				gun_and_weapon.GunAndWeaponMod.LOGGER.warn("Gun index not found: {} (gun pack not loaded?)", GUNBLADE_GUN_ID);
+				return ItemStack.EMPTY;
+			}
 			return GunItemBuilder.create().setId(GUNBLADE_GUN_ID).setAmmoCount(ammo).setFireMode(FireMode.SEMI).build();
 		} catch (NoClassDefFoundError ignored) {}
 		return ItemStack.EMPTY;

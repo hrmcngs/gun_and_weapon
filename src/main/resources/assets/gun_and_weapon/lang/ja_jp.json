@@ -1,15 +1,14 @@
 {
   "item.gun_and_weapon.gunblade_sword": "ガンブレード",
   "itemGroup.gun_and_weapon": "Gun & Weapon",
-  "key.gun_and_weapon.mode_switch": "ガンブレード モード切替",
-  "key.categories.gun_and_weapon": "Gun & Weapon",
 
   "item.gun_and_weapon.gunblade_sword.tooltip.mode": "§7モード: §e近接モード",
   "item.gun_and_weapon.gunblade_sword.tooltip.controls": "§7[右クリック: バレットステップ] [スニーク+右クリック: ガード]",
   "item.gun_and_weapon.gunblade_sword.tooltip.charge": "§7[左クリック長押し: チャージスマッシュ — 残弾を全て消費]",
-  "item.gun_and_weapon.gunblade_sword.tooltip.switch": "§8[V]で射撃モードに切替",
+  "item.gun_and_weapon.gunblade_sword.tooltip.switch": "§8[R]で射撃モードに切替",
 
   "hud.gun_and_weapon.gunblade_melee": "§b⚔ 近接 §7残弾: %s/%s",
+  "message.gun_and_weapon.gun_pack_missing": "§cガンブレードのガンパックが読み込まれていません (TaCZ)",
 
   "weapon_type.the_four_primitives_and_weapons.gunblade": "ガンブレード",
   "motion.the_four_primitives_and_weapons.gun_and_weapon:charge_smash": "チャージスマッシュ",
