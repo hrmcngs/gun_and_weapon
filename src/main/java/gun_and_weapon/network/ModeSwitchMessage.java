@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 
 public class ModeSwitchMessage {
 
-	private static final ResourceLocation GUNBLADE_GUN_ID = new ResourceLocation("tacz", "gunblade");
+	private static final ResourceLocation GUNBLADE_GUN_ID = new ResourceLocation("gun_and_weapon", "gunblade");
 
 	public ModeSwitchMessage() {}
 	public ModeSwitchMessage(FriendlyByteBuf buf) {}
@@ -55,7 +55,6 @@ public class ModeSwitchMessage {
 		data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, readGunAmmo(gunStack));
 		player.getInventory().setItem(player.getInventory().selected, new ItemStack(GunAndWeaponItems.GUNBLADE_SWORD.get()));
 		data.putString(GunbladeSwordItem.TAG_MODE, "melee");
-		data.putInt(GunbladeSwordItem.TAG_CHARGE_TICKS, 0);
 		player.level().playSound(null, player.blockPosition(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 0.5f, 1.5f);
 	}
 

@@ -1,0 +1,7 @@
+{
+  "name": "tacz.gun.gun_and_weapon.gunblade.name",
+  "tooltip": "tacz.gun.gun_and_weapon.gunblade.desc",
+  "display": "gun_and_weapon:gunblade_display",
+  "data": "gun_and_weapon:gunblade_data",
+  "type": "pistol"
+}

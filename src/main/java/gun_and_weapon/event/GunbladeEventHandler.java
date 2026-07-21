@@ -16,7 +16,7 @@ import gun_and_weapon.item.GunbladeSwordItem;
 @Mod.EventBusSubscriber(modid = GunAndWeaponMod.MODID)
 public class GunbladeEventHandler {
 
-	private static final ResourceLocation GUNBLADE_GUN_ID = new ResourceLocation("tacz", "gunblade");
+	private static final ResourceLocation GUNBLADE_GUN_ID = new ResourceLocation("gun_and_weapon", "gunblade");
 
 	@SubscribeEvent
 	public static void onGunFire(GunFireEvent event) {

@@ -1,6 +1,17 @@
 {
-  "item.gun_and_weapon.gunblade_sword": "\u30ac\u30f3\u30d6\u30ec\u30fc\u30c9",
+  "item.gun_and_weapon.gunblade_sword": "ガンブレード",
   "itemGroup.gun_and_weapon": "Gun & Weapon",
-  "key.gun_and_weapon.mode_switch": "\u30ac\u30f3\u30d6\u30ec\u30fc\u30c9 \u30e2\u30fc\u30c9\u5207\u66ff",
-  "key.categories.gun_and_weapon": "Gun & Weapon"
+  "key.gun_and_weapon.mode_switch": "ガンブレード モード切替",
+  "key.categories.gun_and_weapon": "Gun & Weapon",
+
+  "item.gun_and_weapon.gunblade_sword.tooltip.mode": "§7モード: §e近接モード",
+  "item.gun_and_weapon.gunblade_sword.tooltip.controls": "§7[右クリック: バレットステップ] [スニーク+右クリック: ガード]",
+  "item.gun_and_weapon.gunblade_sword.tooltip.charge": "§7[左クリック長押し: チャージスマッシュ — 残弾を全て消費]",
+  "item.gun_and_weapon.gunblade_sword.tooltip.switch": "§8[V]で射撃モードに切替",
+
+  "hud.gun_and_weapon.gunblade_melee": "§b⚔ 近接 §7残弾: %s/%s",
+
+  "weapon_type.the_four_primitives_and_weapons.gunblade": "ガンブレード",
+  "motion.the_four_primitives_and_weapons.gun_and_weapon:charge_smash": "チャージスマッシュ",
+  "motion.the_four_primitives_and_weapons.gun_and_weapon:charge_smash.desc": "残弾を全て消費し、前方へ炎のリングと爆風を放つ。消費弾数が多いほどダメージ上昇。残弾0では不発。"
 }

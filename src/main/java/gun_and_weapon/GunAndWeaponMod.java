@@ -33,13 +33,6 @@ import gun_and_weapon.init.GunAndWeaponItems;
 import gun_and_weapon.init.GunAndWeaponTabs;
 import gun_and_weapon.network.ModeSwitchMessage;
 
-import net.minecraftforge.fml.loading.FMLPaths;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.function.Supplier;
 import java.util.function.Function;
 import java.util.function.BiConsumer;
@@ -73,8 +66,20 @@ public class GunAndWeaponMod {
 		bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) ->
 				event.enqueueWork(gun_and_weapon.init.GunAndWeaponSkills::register));
 
-		// Install TaCZ gun pack to game directory
-		installGunPack();
+		// Register TaCZ gun pack (TaCZ 1.1.x official API).
+		// TaCZ copies /assets/gun_and_weapon/custom/gunblade_pack from this jar
+		// into <gamedir>/tacz/gunblade_pack on every launch and loads it.
+		registerGunPack();
+	}
+
+	private static void registerGunPack() {
+		try {
+			com.tacz.guns.api.resource.ResourceManager.registerExportResource(
+					GunAndWeaponMod.class, "/assets/gun_and_weapon/custom/gunblade_pack");
+			LOGGER.info("Registered TaCZ gun pack: gunblade_pack");
+		} catch (NoClassDefFoundError e) {
+			LOGGER.warn("TaCZ not found, skipping gun pack registration");
+		}
 	}
 
 	private static final String PROTOCOL_VERSION = "1";
@@ -106,50 +111,4 @@ public class GunAndWeaponMod {
 		}
 	}
 
-	private void installGunPack() {
-		try {
-			Path gameDir = FMLPaths.GAMEDIR.get();
-			Path taczDir = gameDir.resolve("tacz");
-			Path packDir = taczDir.resolve("gunblade_pack");
-
-			Path versionMarker = packDir.resolve(".version_1.1.0");
-			if (Files.exists(versionMarker)) {
-				LOGGER.info("Gunblade gun pack already installed (v1.1.0)");
-				return;
-			}
-
-			Files.createDirectories(packDir);
-
-			String basePath = "/assets/tacz/custom/gunblade_pack/";
-			String[] files = {
-					"gunpack.meta.json",
-					"assets/tacz/animations/gunblade.animation.json",
-					"assets/tacz/display/guns/gunblade_display.json",
-					"assets/tacz/geo_models/gun/gunblade_geo.json",
-					"assets/tacz/textures/gun/uv/gunblade.png",
-					"assets/tacz/lang/en_us.json",
-					"assets/tacz/lang/ja_jp.json",
-					"data/tacz/custom/guns/tacz/gunblade.json",
-					"data/tacz/data/guns/gunblade_data.json",
-					"data/tacz/recipes/gun/gunblade.json"
-			};
-
-			for (String file : files) {
-				Path target = packDir.resolve(file.replace('/', java.io.File.separatorChar));
-				Files.createDirectories(target.getParent());
-				try (InputStream is = GunAndWeaponMod.class.getResourceAsStream(basePath + file)) {
-					if (is != null) {
-						Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
-					} else {
-						LOGGER.warn("Gun pack resource not found: " + basePath + file);
-					}
-				}
-			}
-
-			Files.writeString(versionMarker, "1.1.0");
-			LOGGER.info("Gunblade gun pack installed to: " + packDir);
-		} catch (IOException e) {
-			LOGGER.error("Failed to install gunblade gun pack", e);
-		}
-	}
 }

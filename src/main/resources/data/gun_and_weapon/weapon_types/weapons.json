@@ -9,11 +9,16 @@
     "  Chuzume氏 Craftsman_Arms の charge_smash 再現。残弾を全て消費して",
     "  前方に炎のリング3つと爆風を放つ (消費弾数でダメージ上昇 / 残弾0では不発)。",
     "  実体は GunAndWeaponSkills.register() が SkillRegistry に登録している。",
-    "  ここに書いたIDと GunAndWeaponSkills.CHARGE_SMASH は一致させること。",
+    "  発動は左クリック長押し (本体MODのチャージシステム) のみ。",
     "",
-    "  スニーク長押し(30tick)→右クリックの本MOD独自チャージ操作は Java 側で",
-    "  常時有効。加えてこの技をスキル画面のスロットに割り当てれば、MAWの",
-    "  チャージゲージからも発動できる。"
+    "  注意: combat リストと special_weapons の両方に同じIDを書くと",
+    "  getAvailableMotionIds が結合するためスキル画面に二重表示される。",
+    "  ここ (combat) だけに書くこと。",
+    "",
+    "  表示名の翻訳キー:",
+    "    weapon_type.the_four_primitives_and_weapons.gunblade (タイプ名)",
+    "    motion.the_four_primitives_and_weapons.gun_and_weapon:charge_smash (技名)",
+    "  → 本MODの lang/en_us.json, ja_jp.json で定義。display_name はフォールバック。"
   ],
 
   "types": {
@@ -26,7 +31,7 @@
       "motions": {
         "combat": ["thrust", "upper_left_slash", "upper_right_slash", "horizontal_slash", "spin_slash", "gun_and_weapon:charge_smash"],
         "dash": ["dash_rush", "leap_slash"],
-        "right_click": ["none_right", "gun_and_weapon:charge_smash"],
+        "right_click": ["none_right"],
         "shift_right_click": ["none_shift"]
       },
       "default_motions": {
@@ -38,16 +43,5 @@
       "preferred_motions": ["thrust", "upper_left_slash", "upper_right_slash", "horizontal_slash"]
     }
 
-  },
-
-  "special_weapons": {
-    "gun_and_weapon:gunblade_sword": {
-      "enabled": true,
-      "special_motions": {
-        "right_click": ["gun_and_weapon:charge_smash"],
-        "charged": ["gun_and_weapon:charge_smash"],
-        "combat": ["gun_and_weapon:charge_smash"]
-      }
-    }
   }
 }
