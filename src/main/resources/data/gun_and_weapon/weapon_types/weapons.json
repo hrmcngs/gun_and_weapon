@@ -4,8 +4,16 @@
     "本体MOD「The four primitives and Weapons」の WeaponTypeRegistry が自動的に読み込む。",
     "",
     "ガンブレード(近接モード)を独自タイプ 'gunblade' として登録する。",
-    "右クリック(バレットステップ)とスニーク(チャージ)は本MODのJava側で",
-    "実装済みのため、right_click / shift_right_click は none を既定にする。"
+    "",
+    "【ためわざ: gun_and_weapon:charge_smash】",
+    "  Chuzume氏 Craftsman_Arms の charge_smash 再現。残弾を全て消費して",
+    "  前方に炎のリング3つと爆風を放つ (消費弾数でダメージ上昇 / 残弾0では不発)。",
+    "  実体は GunAndWeaponSkills.register() が SkillRegistry に登録している。",
+    "  ここに書いたIDと GunAndWeaponSkills.CHARGE_SMASH は一致させること。",
+    "",
+    "  スニーク長押し(30tick)→右クリックの本MOD独自チャージ操作は Java 側で",
+    "  常時有効。加えてこの技をスキル画面のスロットに割り当てれば、MAWの",
+    "  チャージゲージからも発動できる。"
   ],
 
   "types": {
@@ -16,18 +24,30 @@
         "gun_and_weapon:gunblade_sword"
       ],
       "motions": {
-        "combat": ["thrust", "upper_left_slash", "upper_right_slash", "horizontal_slash", "spin_slash"],
+        "combat": ["thrust", "upper_left_slash", "upper_right_slash", "horizontal_slash", "spin_slash", "gun_and_weapon:charge_smash"],
         "dash": ["dash_rush", "leap_slash"],
-        "right_click": ["none_right"],
+        "right_click": ["none_right", "gun_and_weapon:charge_smash"],
         "shift_right_click": ["none_shift"]
       },
       "default_motions": {
         "first_hit": "upper_right_slash",
         "second_hit": "upper_left_slash",
         "third_hit": "thrust",
-        "charged": "spin_slash"
-      }
+        "charged": "gun_and_weapon:charge_smash"
+      },
+      "preferred_motions": ["thrust", "upper_left_slash", "upper_right_slash", "horizontal_slash"]
     }
 
+  },
+
+  "special_weapons": {
+    "gun_and_weapon:gunblade_sword": {
+      "enabled": true,
+      "special_motions": {
+        "right_click": ["gun_and_weapon:charge_smash"],
+        "charged": ["gun_and_weapon:charge_smash"],
+        "combat": ["gun_and_weapon:charge_smash"]
+      }
+    }
   }
 }

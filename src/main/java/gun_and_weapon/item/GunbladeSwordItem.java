@@ -82,9 +82,10 @@ public class GunbladeSwordItem extends SwordItem {
 		int charge = data.getInt(TAG_CHARGE_TICKS);
 
 		if (charge >= MAX_CHARGE_TICKS) {
-			// Full charge + right click = Charge Smash
-			GunbladeAttacks.executeChargeSmash(world, player);
-			data.putInt(TAG_CHARGE_TICKS, 0);
+			// Full charge + right click = Charge Smash (残弾全消費 / 弾切れなら不発でチャージ維持)
+			if (GunbladeAttacks.executeChargeSmash(world, player)) {
+				data.putInt(TAG_CHARGE_TICKS, 0);
+			}
 			return InteractionResultHolder.success(stack);
 		} else if (player.isShiftKeyDown()) {
 			// Sneaking + right click = Guard mode (blocking)

@@ -1,15 +1,36 @@
 #!/bin/bash
+# Gun and Weapon — ビルドスクリプト
+#
+# 使い方:
+#   bash build.sh            通常ビルド（build/libs に jar を出力）
+#   bash build.sh clean      クリーンしてからビルド
+#   bash build.sh offline    ネットワークを使わずビルド（依存が取得済みの場合のみ）
+#
+# clean と offline は併用できる:
+#   bash build.sh clean offline
 set -e
 
-echo "=== Building Gun and Weapon ==="
+source "$(dirname "$0")/scripts/common.sh"
 
-if grep -qi microsoft /proc/version 2>/dev/null; then
-    WIN_DIR=$(wslpath -w "$(pwd)")
-    cmd.exe /c "${WIN_DIR}\\gradlew_wsl.bat" build
-else
-    export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"
-    ./gradlew build
-fi
+DO_CLEAN=""
+TASKS="build"
+EXTRA=""
+
+for arg in "$@"; do
+    case "$arg" in
+        clean)            DO_CLEAN=1 ;;
+        offline|--offline) EXTRA="$EXTRA --offline" ;;
+        *)                EXTRA="$EXTRA $arg" ;;
+    esac
+done
+
+[ -n "$DO_CLEAN" ] && TASKS="clean build"
+
+echo "=== Building Gun and Weapon ==="
+echo "    tasks:$( echo " $TASKS" )$EXTRA"
+echo ""
+
+run_gradle $TASKS $EXTRA
 
 echo ""
 echo "=== Build complete ==="

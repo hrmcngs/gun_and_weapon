@@ -89,39 +89,75 @@ public class GunbladeAttacks {
 		player.getCooldowns().addCooldown(player.getMainHandItem().getItem(), 30);
 	}
 
-	public static void executeChargeSmash(Level world, Player player) {
-		if (world.isClientSide()) return;
+	/**
+	 * チャージスマッシュ (Chuzume氏 Craftsman_Arms の charge_smash 再現)。
+	 * 残弾を全て消費し、視線方向へ炎のリング3つと前方範囲ダメージを放つ。
+	 * 消費した残弾が多いほどダメージが上がる (フル装填8発で本家と同じ14)。
+	 *
+	 * @return 発動できた場合 true (残弾0なら不発で false)
+	 */
+	public static boolean executeChargeSmash(Level world, Player player) {
+		if (world.isClientSide()) return false;
 
 		CompoundTag data = player.getPersistentData();
 		int ammo = data.getInt(GunbladeSwordItem.TAG_AMMO_COUNT);
-		if (ammo > 0) data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, ammo - 1);
+		if (ammo <= 0) {
+			// 弾切れ: 不発 (チャージは維持したまま)
+			world.playSound(null, player.blockPosition(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 1.0f, 1.2f);
+			return false;
+		}
+		// 残弾全消費 — 消費量でダメージスケール (8発 = 本家準拠の14)
+		data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, 0);
+		float damage = 8.0f + 0.75f * ammo;
 
 		player.swing(InteractionHand.MAIN_HAND, true);
-		double radius = 4.0;
-		Vec3 center = player.position();
 
-		List<LivingEntity> targets = world.getEntitiesOfClass(LivingEntity.class,
-				AABB.ofSize(center, radius * 2, radius * 2, radius * 2), e -> e != player && e.isAlive() && e.distanceTo(player) <= radius);
-		for (LivingEntity target : targets) {
-			target.hurt(player.damageSources().playerAttack(player), 14.0f);
-			double dx = target.getX() - player.getX();
-			double dz = target.getZ() - player.getZ();
-			double dist = Math.sqrt(dx * dx + dz * dz);
-			if (dist > 0) target.knockback(1.5f, -dx / dist, -dz / dist);
-			target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 1));
-			target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
-			target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 20, 0));
-		}
+		Vec3 eye = player.getEyePosition();
+		Vec3 look = player.getLookAngle();
+
+		// 視線に垂直な炎リング用の直交基底
+		Vec3 upRef = Math.abs(look.y) > 0.99 ? new Vec3(1, 0, 0) : new Vec3(0, 1, 0);
+		Vec3 u = look.cross(upRef).normalize();
+		Vec3 v = look.cross(u).normalize();
 
 		if (world instanceof ServerLevel sl) {
-			for (double angle = 0; angle < Math.PI * 2; angle += Math.PI / 12)
-				for (double r = 1.0; r <= radius; r += 1.0)
-					sl.sendParticles(ParticleTypes.SWEEP_ATTACK, center.x + Math.cos(angle) * r, center.y + 0.5, center.z + Math.sin(angle) * r, 1, 0, 0, 0, 0);
-			sl.sendParticles(ParticleTypes.EXPLOSION, center.x, center.y + 1, center.z, 3, 0.5, 0.5, 0.5, 0);
-			sl.sendParticles(ParticleTypes.FLAME, center.x, center.y + 0.5, center.z, 20, 1.5, 0.3, 1.5, 0.05);
+			// 本家 charge_smash/shape: 前方2,4,6に半径1の炎リング(20点) + 中心に爆発と溶岩
+			for (double d : new double[]{2.0, 4.0, 6.0}) {
+				Vec3 center = eye.add(look.scale(d));
+				for (int i = 0; i < 20; i++) {
+					double t = (Math.PI * 2 * i) / 20;
+					Vec3 p = center.add(u.scale(Math.cos(t))).add(v.scale(Math.sin(t)));
+					sl.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+				}
+				sl.sendParticles(ParticleTypes.EXPLOSION, center.x, center.y, center.z, 1, 0, 0, 0, 0);
+				sl.sendParticles(ParticleTypes.LAVA, center.x, center.y, center.z, 10, 0, 0, 0, 0.1);
+			}
 		}
-		world.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.8f, 1.2f);
-		world.playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0f, 0.8f);
+
+		// 本家: 前方2.5と6の各半径2にダメージ14 + 弱体化/採掘疲労/鈍化 (10秒)
+		java.util.Set<LivingEntity> hitTargets = new java.util.HashSet<>();
+		for (double d : new double[]{2.5, 6.0}) {
+			Vec3 zone = eye.add(look.scale(d));
+			hitTargets.addAll(world.getEntitiesOfClass(LivingEntity.class,
+					AABB.ofSize(zone, 4.0, 4.0, 4.0), e -> e != player && e.isAlive() && e.position().distanceTo(zone) <= 2.0));
+		}
+		for (LivingEntity target : hitTargets) {
+			target.hurt(player.damageSources().playerAttack(player), damage);
+			target.knockback(1.0f, player.getX() - target.getX(), player.getZ() - target.getZ());
+			// 本家: effect give 1秒 amplifier10 (hidden)
+			target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20, 10, false, false));
+			target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 20, 10, false, false));
+			target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 10, false, false));
+			world.playSound(null, target.blockPosition(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1.5f, 1.0f);
+		}
+
+		// 本家の発射音: トライデント + 爆発 + 花火 + ブレイズ
+		world.playSound(null, player.blockPosition(), SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 2.0f, 0.5f);
+		world.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 2.0f, 1.5f);
+		world.playSound(null, player.blockPosition(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 3.0f, 0.5f);
+		world.playSound(null, player.blockPosition(), SoundEvents.BLAZE_HURT, SoundSource.PLAYERS, 2.0f, 1.5f);
+
 		player.getCooldowns().addCooldown(player.getMainHandItem().getItem(), 60);
+		return true;
 	}
 }

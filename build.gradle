@@ -39,6 +39,41 @@ if (mawSourceJarDir.exists()) {
     logger.warn("[addon] libs/local/${maw_artifact}/${maw_version}/ に手動でjarを置いてください。")
 }
 
+// =====================================================================
+// TaCZ jar のベンダリング (--offline ビルド対応)
+//   curse.maven からの解決はネットワークが要るため、一度取得できた jar を
+//   libs/local/tacz/ にコピーしておき、以後はそちらを参照する。
+//   これで CurseMaven に一切アクセスせずに --offline ビルドできる。
+//
+//   手動で置くこともできる (CurseForge から落とした jar をリネーム):
+//     libs/local/tacz/1.20.1-1.1.7/tacz-1.20.1-1.1.7.jar
+// =====================================================================
+def tacz_version   = '1.20.1-1.1.7'
+def tacz_curse_id  = 'timeless-and-classics-zero-1028108'
+def tacz_curse_file = '7401617'
+def taczDestDir  = file("libs/local/tacz/${tacz_version}")
+def taczDestFile = new File(taczDestDir, "tacz-${tacz_version}.jar")
+
+if (!taczDestFile.exists()) {
+    // Gradle のモジュールキャッシュに既に落ちていればそこからコピーする。
+    def taczCacheRoot = file("${gradle.gradleUserHomeDir}/caches/modules-2/files-2.1/curse.maven/${tacz_curse_id}/${tacz_curse_file}")
+    if (taczCacheRoot.exists()) {
+        def cachedJar = fileTree(taczCacheRoot) { include '**/*.jar' }.files
+                .find { !it.name.contains('-sources') && !it.name.contains('-javadoc') }
+        if (cachedJar != null) {
+            taczDestDir.mkdirs()
+            taczDestFile.bytes = cachedJar.bytes
+            println "[addon] TaCZ jar をベンダリングしました: ${cachedJar.name} → ${taczDestFile.name}"
+        }
+    }
+}
+def taczVendored = taczDestFile.exists()
+if (taczVendored) {
+    println "[addon] TaCZ: libs/local から使用 (--offline 可)"
+} else {
+    logger.lifecycle("[addon] TaCZ: CurseMaven から取得します (初回はネットワークが必要)")
+}
+
 minecraft {
     mappings channel: 'official', version: '1.20.1'
 
@@ -95,13 +130,19 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
+
     // TaCZ 1.20.1-1.1.7-hotfix
-    implementation fg.deobf("curse.maven:timeless-and-classics-zero-1028108:7401617")
+    //   libs/local にベンダリング済みならそちらを使う (--offline 可)。
+    //   無ければ CurseMaven から取得し、次回ビルド時にベンダリングされる。
+    if (taczVendored) {
+        implementation fg.deobf("local:tacz:${tacz_version}")
+    } else {
+        implementation fg.deobf("curse.maven:${tacz_curse_id}:${tacz_curse_file}")
+    }
 
     // 本体MOD「The four primitives and Weapons」(libs/local から取り込み)
-    // 統合はデータ駆動 (weapon_types / weapon_stats JSON) なのでコンパイルには
-    // 不要だが、dev実行時にロードさせるため runtimeOnly で乗せる。
-    runtimeOnly fg.deobf("local:${maw_artifact}:${maw_version}")
+    // SkillRegistry / ISkillAction を使って特殊技を登録するため implementation。
+    implementation fg.deobf("local:${maw_artifact}:${maw_version}")
 
     // 本体MODの前提 — dev実行時のランタイム用 (本体MODの任意依存)
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.10.0+1.20.1")

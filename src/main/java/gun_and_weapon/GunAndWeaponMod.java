@@ -69,6 +69,10 @@ public class GunAndWeaponMod {
 				buf -> new ModeSwitchMessage(buf),
 				(msg, ctx) -> msg.handle(ctx));
 
+		// Register MAW (The four primitives and Weapons) special skills
+		bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) ->
+				event.enqueueWork(gun_and_weapon.init.GunAndWeaponSkills::register));
+
 		// Install TaCZ gun pack to game directory
 		installGunPack();
 	}
