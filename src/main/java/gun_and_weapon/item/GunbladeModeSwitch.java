@@ -81,7 +81,8 @@ public final class GunbladeModeSwitch {
 			if (!tag.contains("GunId")) {
 				tag.putString("GunId", GUNBLADE_GUN_ID.toString());
 			}
-			if (!tag.contains("GunFireMode")) {
+			if (!tag.contains("GunFireMode") || "BURST".equals(tag.getString("GunFireMode"))) {
+				// バーストは廃止 (1クリックで全弾発射になるため)。既存アイテムも矯正する
 				tag.putString("GunFireMode", "SEMI");
 			}
 			if (!tag.contains("GunCurrentAmmoCount")) {

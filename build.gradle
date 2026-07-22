@@ -3,7 +3,97 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
 }
 
-version = '1.0'
+// =====================================================================
+// バージョン決定 (Backpack-Arsenal と同じ仕組みの簡易版):
+//   ./gradlew build (bash build.sh) 実行時に対話プロンプトが出る:
+//     1) version を聞く (空 Enter で gradle.properties の mod_version)
+//     2) release type を聞く (b/a/r/rc/t)
+//   最終的に "<version><suffix>" が jar 名と mods.toml の version になる。
+//   CI (GITHUB_ACTIONS) と -Prelease_type / -Pmod_version_override 指定時、
+//   build 以外のタスク (runClient 等) ではプロンプトを skip。
+//   stdin が無い場合 (スクリプト実行) は既定値で進む。
+// =====================================================================
+ext.stripReleaseSuffix = { String v -> v?.replaceFirst(/-(alpha|beta|rc|test)(\.\d+)?$/, '') }
+ext.suffixForReleaseType = { String type ->
+    if (!type) return ''
+    def t = type.toLowerCase().trim()
+    if (t.startsWith('rc')) return '-rc'
+    if (t.startsWith('r')) return ''
+    if (t.startsWith('b')) return '-beta'
+    if (t.startsWith('a')) return '-alpha'
+    if (t.startsWith('t')) return '-test'
+    return ''
+}
+ext.cachedStdinReader = null
+ext.readLineFlexible = { ->
+    def console = System.console()
+    if (console != null) {
+        try { return console.readLine() } catch (Throwable ignored) {}
+    }
+    if (project.ext.cachedStdinReader == null) {
+        try {
+            project.ext.cachedStdinReader = new BufferedReader(new InputStreamReader(System.in))
+        } catch (Throwable ignored) {
+            return null
+        }
+    }
+    try { return project.ext.cachedStdinReader.readLine() } catch (Throwable ignored) { return null }
+}
+
+def baseModVersion = (project.findProperty('mod_version') ?: '1.0.0').toString()
+def overrideReleaseType = project.findProperty('release_type')
+def overrideModVersion  = project.findProperty('mod_version_override')
+def isCi = System.getenv('CI') == 'true' || System.getenv('GITHUB_ACTIONS') == 'true'
+def shouldPrompt = !overrideReleaseType && !overrideModVersion && !isCi &&
+        gradle.startParameter.taskNames.any { it == 'build' || it.endsWith(':build') }
+
+def chosenBaseVersion = null
+def chosenReleaseType = overrideReleaseType
+if (shouldPrompt) {
+    def fallbackBase = stripReleaseSuffix(baseModVersion)
+    print "\n[gun_and_weapon] Enter mod version (press Enter for ${fallbackBase}):\n  > "
+    System.out.flush()
+    def input = readLineFlexible()?.trim()
+    chosenBaseVersion = input ? stripReleaseSuffix(input) : fallbackBase
+
+    print "\n[gun_and_weapon] Select release type for version ${chosenBaseVersion}:\n" +
+          "  [b]eta     (-beta)\n" +
+          "  [a]lpha    (-alpha)\n" +
+          "  [r]elease  (suffix 無し, default)\n" +
+          "  [rc]       (-rc)\n" +
+          "  [t]est     (-test, ローカル確認用)\n" +
+          "  > "
+    System.out.flush()
+    def typeInput = readLineFlexible()
+    chosenReleaseType = typeInput?.trim() ? typeInput.trim() : 'r'
+}
+
+if (overrideModVersion) {
+    version = overrideModVersion.toString()
+} else if (chosenBaseVersion != null) {
+    version = chosenBaseVersion + suffixForReleaseType(chosenReleaseType?.toString())
+} else if (overrideReleaseType) {
+    version = stripReleaseSuffix(baseModVersion) + suffixForReleaseType(overrideReleaseType.toString())
+} else {
+    version = baseModVersion
+}
+logger.lifecycle("[gun_and_weapon] version = ${version}")
+
+// 対話で選んだ version を gradle.properties に書き戻す (次回の既定値になる)
+if (shouldPrompt) {
+    def gradleProps = file('gradle.properties')
+    if (gradleProps.exists()) {
+        def lines = gradleProps.readLines()
+        def newLines = lines.collect { line ->
+            (line ==~ /^\s*mod_version\s*=.*$/) ? "mod_version=${version}".toString() : line
+        }
+        if (lines != newLines) {
+            gradleProps.text = newLines.join('\n') + '\n'
+            logger.lifecycle("[gun_and_weapon] persisted mod_version=${version} -> gradle.properties")
+        }
+    }
+}
+
 group = 'com.yourname.modid'
 archivesBaseName = 'gun_and_weapon'
 
@@ -193,6 +283,14 @@ tasks.register('generateGunbladeAssets') {
     }
 }
 processResources.dependsOn generateGunbladeAssets
+
+// mods.toml の version を build 時に展開
+processResources {
+    inputs.property 'mod_version', version
+    filesMatching('META-INF/mods.toml') {
+        expand 'mod_version': version
+    }
+}
 
 apply from: 'mcreator.gradle'
 

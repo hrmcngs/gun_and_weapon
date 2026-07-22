@@ -4,11 +4,15 @@ license="Academic Free License v3.0"
 
 [[mods]]
 modId="gun_and_weapon"
-version="1.0.0"
-displayName="gun and weapon"
-displayURL="https://mcreator.net"
-credits="Created using mod maker MCreator - https://mcreator.net/about"
-authors="hrmcn, MCreator"
+version="${mod_version}"
+displayName="Craftsman Gunblade"
+logoFile="logo.png"
+credits="Original Craftsman Gunblade by Chuzume - https://github.com/Chuzume/Craftsman_Arms (used with permission)"
+authors="hrmcn"
+description='''
+剣と銃を[F]キーで切り替えるガンブレードを追加。
+TACZ と The four primitives and Weapons の連携アドオン。
+'''
 
 # Start of user code block mod configuration
 # End of user code block mod configuration

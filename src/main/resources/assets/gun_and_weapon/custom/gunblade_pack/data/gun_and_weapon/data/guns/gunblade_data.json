@@ -12,9 +12,18 @@
       "armor_ignore": 0.1,
       "head_shot_multiplier": 1.333,
       "damage_adjust": [
-        { "distance": 20, "damage": 6.0 },
-        { "distance": 40, "damage": 4.0 },
-        { "distance": "infinite", "damage": 3.0 }
+        {
+          "distance": 20,
+          "damage": 6.0
+        },
+        {
+          "distance": 40,
+          "damage": 4.0
+        },
+        {
+          "distance": "infinite",
+          "damage": 3.0
+        }
       ]
     },
     "speed": 150,
@@ -46,24 +55,62 @@
     "reload": 0.15
   },
   "crawl_recoil_multiplier": 0.6,
-  "fire_mode": ["semi", "burst"],
-  "burst_data": {
-    "continuous_shoot": false,
-    "count": 8,
-    "bpm": 900,
-    "min_interval": 1.5
-  },
+  "fire_mode": [
+    "semi"
+  ],
   "recoil": {
     "pitch": [
-      { "time": 0, "value": [2.0, 2.0] },
-      { "time": 0.03, "value": [1.2, 1.2] },
-      { "time": 0.06, "value": [1.8, 1.8] },
-      { "time": 0.25, "value": [0.1, 0.1] },
-      { "time": 0.35, "value": [0, 0] }
+      {
+        "time": 0,
+        "value": [
+          2.0,
+          2.0
+        ]
+      },
+      {
+        "time": 0.03,
+        "value": [
+          1.2,
+          1.2
+        ]
+      },
+      {
+        "time": 0.06,
+        "value": [
+          1.8,
+          1.8
+        ]
+      },
+      {
+        "time": 0.25,
+        "value": [
+          0.1,
+          0.1
+        ]
+      },
+      {
+        "time": 0.35,
+        "value": [
+          0,
+          0
+        ]
+      }
     ],
     "yaw": [
-      { "time": 0, "value": [-0.6, 0.6] },
-      { "time": 0.2, "value": [0, 0] }
+      {
+        "time": 0,
+        "value": [
+          -0.6,
+          0.6
+        ]
+      },
+      {
+        "time": 0.2,
+        "value": [
+          0,
+          0
+        ]
+      }
     ]
   },
   "inaccuracy": {

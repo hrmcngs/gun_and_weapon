@@ -111,6 +111,16 @@ public class GunbladeItem extends ModernKineticGunItem {
 		super.melee(data, shooter, stack);
 	}
 
+	/**
+	 * TACZ の AbstractGunItem は腕振りアニメを常にキャンセルする (return true)。
+	 * 近接モードでは通常武器と同じように腕を振らせる。
+	 */
+	@Override
+	public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
+		if (isMelee(stack)) return false;
+		return super.onEntitySwing(stack, entity);
+	}
+
 	// ===================================================================
 	// 剣動作 (近接モード)
 	// ===================================================================
