@@ -31,7 +31,6 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import gun_and_weapon.init.GunAndWeaponItems;
 import gun_and_weapon.init.GunAndWeaponTabs;
-import gun_and_weapon.network.ModeSwitchMessage;
 
 import java.util.function.Supplier;
 import java.util.function.Function;
@@ -56,30 +55,14 @@ public class GunAndWeaponMod {
 		GunAndWeaponItems.REGISTRY.register(bus);
 		GunAndWeaponTabs.REGISTRY.register(bus);
 
-		// Register network messages
-		addNetworkMessage(ModeSwitchMessage.class,
-				(msg, buf) -> msg.encode(buf),
-				buf -> new ModeSwitchMessage(buf),
-				(msg, ctx) -> msg.handle(ctx));
-
 		// Register MAW (The four primitives and Weapons) special skills
 		bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) ->
 				event.enqueueWork(gun_and_weapon.init.GunAndWeaponSkills::register));
 
-		// Register TaCZ gun pack (TaCZ 1.1.x official API).
-		// TaCZ copies /assets/gun_and_weapon/custom/gunblade_pack from this jar
-		// into <gamedir>/tacz/gunblade_pack on every launch and loads it.
-		registerGunPack();
-	}
-
-	private static void registerGunPack() {
-		try {
-			com.tacz.guns.api.resource.ResourceManager.registerExportResource(
-					GunAndWeaponMod.class, "/assets/gun_and_weapon/custom/gunblade_pack");
-			LOGGER.info("Registered TaCZ gun pack: gunblade_pack");
-		} catch (NoClassDefFoundError e) {
-			LOGGER.warn("TaCZ not found, skipping gun pack registration");
-		}
+		// Install TaCZ gun pack into <gamedir>/tacz/gunblade_pack.
+		// geo は剣モデル (gunblade_sword.json) から毎起動時に生成される
+		// (剣モデルが唯一のソース — TaczGeoGenerator 参照)。
+		gun_and_weapon.gunpack.GunPackInstaller.install();
 	}
 
 	private static final String PROTOCOL_VERSION = "1";

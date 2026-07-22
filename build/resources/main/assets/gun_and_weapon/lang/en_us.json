@@ -1,15 +1,12 @@
 {
   "item.gun_and_weapon.gunblade_sword": "Gunblade",
   "itemGroup.gun_and_weapon": "Gun & Weapon",
-
   "item.gun_and_weapon.gunblade_sword.tooltip.mode": "§7Mode: §eMelee",
   "item.gun_and_weapon.gunblade_sword.tooltip.controls": "§7[RClick: Bullet Step] [Sneak+RClick: Guard]",
   "item.gun_and_weapon.gunblade_sword.tooltip.charge": "§7[Hold LClick: Charge Smash — consumes all ammo]",
-  "item.gun_and_weapon.gunblade_sword.tooltip.switch": "§8Press [R] to switch to ranged mode",
-
+  "item.gun_and_weapon.gunblade_sword.tooltip.switch": "§8Press [F] (swap-hands key) to switch to ranged mode",
   "hud.gun_and_weapon.gunblade_melee": "§b⚔ MELEE §7Ammo: %s/%s",
   "message.gun_and_weapon.gun_pack_missing": "§cGunblade gun pack is not loaded (TaCZ)",
-
   "weapon_type.the_four_primitives_and_weapons.gunblade": "Gunblade",
   "motion.the_four_primitives_and_weapons.gun_and_weapon:charge_smash": "Charge Smash",
   "motion.the_four_primitives_and_weapons.gun_and_weapon:charge_smash.desc": "Consume all remaining ammo to unleash rings of fire and a blast wave forward. More ammo spent = more damage. Fails with 0 ammo."
