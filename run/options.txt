@@ -134,7 +134,7 @@ key_key.the_four_primitives_and_weapons.crystal_pouch:key.keyboard.b
 key_key.the_four_primitives_and_weapons.scabbard_debug:key.keyboard.f8
 key_key.the_four_primitives_and_weapons.r:key.keyboard.r
 key_key.curios.open.desc:key.keyboard.g
-soundCategory_master:1.0
+soundCategory_master:0.10671343697959026
 soundCategory_music:0.0
 soundCategory_record:1.0
 soundCategory_weather:0.0

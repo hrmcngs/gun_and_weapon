@@ -40,7 +40,7 @@ public class GunAndWeaponSkills {
 			SkillRegistry.register(CHARGE_SMASH,
 					"チャージスマッシュ",
 					"残弾を全て消費し、前方へ炎のリングと爆風を放つ (消費弾数でダメージ上昇 / 残弾0では不発)",
-					MotionCategory.SPECIAL, slots, "GunbladeSwordItem",
+					MotionCategory.SPECIAL, slots, "GunbladeItem",
 					(Player player, float chargePercent) ->
 							GunbladeAttacks.executeChargeSmash(player.level(), player));
 

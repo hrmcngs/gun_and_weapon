@@ -71,3 +71,19 @@ m870 の static_idle の rotation/scale を流用し、position の z だけ
   アイコンは `make_geo2.py` 系のスクリプトでモデルから横視点レンダリングして生成。
 - サウンドは他パックの実在ファイルを参照できる (例: `tacz:m870/m870_shoot`)。
   参照先の .ogg が実在するか jar 内 `tacz_sounds/` を確認すること。
+
+## 統合アイテム (単一ID + NBTモード切替)
+
+`gun_and_weapon:gunblade_sword` は TACZ の `ModernKineticGunItem` を継承した
+統合アイテム (`GunbladeItem`)。NBT `gunblade:mode` (melee/ranged) で切替。
+
+- **melee**: `getGunId` がダミーID (`gunblade_melee_dummy`) を返す
+  → TACZ の index 解決が失敗し、銃描画/射撃/HUD が素通り。
+  ※ null を返すと TACZ の `isSame` が NPE でクラッシュするのでダミーID必須
+- TACZ は IGun 所持中 `RenderHandEvent` と クリック入力を無条件キャンセルする
+  → melee 時は LOWEST 優先度 + receiveCanceled で取り消して
+  バニラ描画/攻撃を復元 (`GunbladeClientInput`)
+- モデルは `GunbladeInventoryModel` のラッパーで切替:
+  melee=剣クアッド全コンテキスト / ranged=GUIのみ剣・他は BEWLR (TACZ)
+- shoot/startReload/startBolt/fireSelect/melee は melee 時 no-op オーバーライド
+- 旧形式 (tacz:modern_kinetic_gun) は [F] 切替時に統合アイテムへ自動移行

@@ -102,7 +102,7 @@ public final class TaczGeoGenerator {
 		// ===== 表示位置 =====
 		bones.add(bone("positioning", null, 0, 0, 0));
 		JsonObject fixed = bone("fixed", "positioning", 1.35, 8.275, -0.05);
-		fixed.add("rotation", arr(0, 90, -35)); // 額縁: 剣モードと同じ斜め側面
+		fixed.add("rotation", fixedRotation(model)); // 額縁: 剣モデルの display.fixed から導出
 		bones.add(fixed);
 		bones.add(bone("ground", "positioning", 0, -4, 2));
 		bones.add(bone("thirdperson_hand", "positioning", 0, 6.825, 5.425));
@@ -203,6 +203,22 @@ public final class TaczGeoGenerator {
 				}
 			}
 		}
+	}
+
+	/**
+	 * 額縁 (fixed) の向きを剣モデルの display.fixed.rotation から導出する。
+	 * 座標系変換 (xミラー等) により vanilla の [rx,ry,rz] は TACZ では
+	 * [-rx,-ry,rz] に対応する。display.fixed が無い場合は実測の既定値。
+	 */
+	private static JsonArray fixedRotation(JsonObject model) {
+		if (model.has("display")) {
+			JsonObject disp = model.getAsJsonObject("display");
+			if (disp.has("fixed") && disp.getAsJsonObject("fixed").has("rotation")) {
+				JsonArray r = disp.getAsJsonObject("fixed").getAsJsonArray("rotation");
+				return arr(-r.get(0).getAsDouble(), -r.get(1).getAsDouble(), r.get(2).getAsDouble());
+			}
+		}
+		return arr(0, 90, -35);
 	}
 
 	private static JsonObject bone(String name, String parent, double px, double py, double pz) {

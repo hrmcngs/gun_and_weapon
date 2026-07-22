@@ -10,11 +10,11 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import gun_and_weapon.item.GunbladeSwordItem;
 
 import java.util.Comparator;
 import java.util.List;
@@ -99,15 +99,16 @@ public class GunbladeAttacks {
 	public static boolean executeChargeSmash(Level world, Player player) {
 		if (world.isClientSide()) return false;
 
-		CompoundTag data = player.getPersistentData();
-		int ammo = data.getInt(GunbladeSwordItem.TAG_AMMO_COUNT);
+		ItemStack mainHand = player.getMainHandItem();
+		CompoundTag tag = mainHand.getTag();
+		int ammo = tag != null ? tag.getInt("GunCurrentAmmoCount") : 0;
 		if (ammo <= 0) {
 			// 弾切れ: 不発 (チャージは維持したまま)
 			world.playSound(null, player.blockPosition(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 1.0f, 1.2f);
 			return false;
 		}
 		// 残弾全消費 — 消費量でダメージスケール (8発 = 本家準拠の14)
-		data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, 0);
+		mainHand.getOrCreateTag().putInt("GunCurrentAmmoCount", 0);
 		float damage = 8.0f + 0.75f * ammo;
 
 		player.swing(InteractionHand.MAIN_HAND, true);

@@ -2,8 +2,6 @@ package gun_and_weapon.item;
 
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IGun;
-import com.tacz.guns.api.item.builder.GunItemBuilder;
-import com.tacz.guns.api.item.gun.FireMode;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -19,8 +17,9 @@ import gun_and_weapon.init.GunAndWeaponItems;
 /**
  * ガンブレードの近接⇔射撃モード切替 (サーバーサイド)。
  *
+ * 統合アイテム (GunbladeItem) の NBT フラグを切り替えるだけなので、
+ * エンチャント・名前・残弾・カスタムNBTなど全状態が自動的に維持される。
  * オフハンド持ち替えキー ([F]) を GunbladeEventHandler が横取りして呼ぶ。
- * 残弾はプレイヤーの永続NBTでモード間共有される。
  */
 public final class GunbladeModeSwitch {
 
@@ -28,13 +27,14 @@ public final class GunbladeModeSwitch {
 
 	private GunbladeModeSwitch() {}
 
-	/** メインハンドがガンブレード (どちらのモードでも) なら true */
+	/** メインハンドがガンブレード (統合アイテム or 旧TACZ銃形態) なら true */
 	public static boolean isGunblade(ItemStack stack) {
-		if (stack.getItem() == GunAndWeaponItems.GUNBLADE_SWORD.get()) return true;
-		return isGunbladeGun(stack);
+		return stack.getItem() instanceof GunbladeItem || isLegacyGunForm(stack);
 	}
 
-	public static boolean isGunbladeGun(ItemStack stack) {
+	/** 旧バージョンで作られた TACZ 銃形態 (tacz:modern_kinetic_gun + GunId) か */
+	public static boolean isLegacyGunForm(ItemStack stack) {
+		if (stack.getItem() instanceof GunbladeItem) return false;
 		try {
 			IGun iGun = IGun.getIGunOrNull(stack);
 			if (iGun != null) return GUNBLADE_GUN_ID.equals(iGun.getGunId(stack));
@@ -42,55 +42,66 @@ public final class GunbladeModeSwitch {
 		return false;
 	}
 
+	/** 互換用: 射撃モードのガンブレードか (統合アイテムranged or 旧形態) */
+	public static boolean isGunbladeGun(ItemStack stack) {
+		if (stack.getItem() instanceof GunbladeItem) return GunbladeItem.isRanged(stack);
+		return isLegacyGunForm(stack);
+	}
+
 	/** メインハンドのガンブレードのモードを切り替える */
 	public static void toggle(Player player) {
-		ItemStack mainHand = player.getMainHandItem();
-		if (mainHand.getItem() == GunAndWeaponItems.GUNBLADE_SWORD.get()) {
-			switchToRanged(player);
-		} else if (isGunbladeGun(mainHand)) {
-			switchToMelee(player, mainHand);
-		}
-	}
+		ItemStack stack = player.getMainHandItem();
 
-	private static void switchToRanged(Player player) {
-		CompoundTag data = player.getPersistentData();
-		int ammo = Math.max(0, Math.min(data.getInt(GunbladeSwordItem.TAG_AMMO_COUNT), GunbladeSwordItem.MAX_AMMO));
-		ItemStack gunStack = createGunStack(ammo);
-		if (gunStack.isEmpty()) {
-			// ガンパックが読み込まれていない (gun index 未登録) 場合は切り替えない
-			player.displayClientMessage(Component.translatable("message.gun_and_weapon.gun_pack_missing"), true);
+		// 旧TACZ銃形態 → 統合アイテムへ移行 (全NBT維持・近接モードで開始)
+		if (isLegacyGunForm(stack)) {
+			ItemStack unified = new ItemStack(GunAndWeaponItems.GUNBLADE_SWORD.get());
+			if (stack.getTag() != null) unified.setTag(stack.getTag().copy());
+			unified.getOrCreateTag().putString(GunbladeItem.TAG_MODE, "melee");
+			unified.getOrCreateTag().remove("maw:no_melee");
+			player.getInventory().setItem(player.getInventory().selected, unified);
+			playSwitchSound(player, false);
 			return;
 		}
-		player.getInventory().setItem(player.getInventory().selected, gunStack);
-		data.putString(GunbladeSwordItem.TAG_MODE, "ranged");
-		player.level().playSound(null, player.blockPosition(), SoundEvents.IRON_DOOR_OPEN, SoundSource.PLAYERS, 0.5f, 1.5f);
-	}
 
-	private static void switchToMelee(Player player, ItemStack gunStack) {
-		CompoundTag data = player.getPersistentData();
-		data.putInt(GunbladeSwordItem.TAG_AMMO_COUNT, readGunAmmo(gunStack));
-		player.getInventory().setItem(player.getInventory().selected, new ItemStack(GunAndWeaponItems.GUNBLADE_SWORD.get()));
-		data.putString(GunbladeSwordItem.TAG_MODE, "melee");
-		player.level().playSound(null, player.blockPosition(), SoundEvents.IRON_DOOR_CLOSE, SoundSource.PLAYERS, 0.5f, 1.5f);
-	}
+		if (!(stack.getItem() instanceof GunbladeItem)) return;
 
-	private static ItemStack createGunStack(int ammo) {
-		try {
-			// gun index 未登録のまま組み立てると「不明な銃」になるため確認する
-			if (TimelessAPI.getCommonGunIndex(GUNBLADE_GUN_ID).isEmpty()) {
-				GunAndWeaponMod.LOGGER.warn("Gun index not found: {} (gun pack not loaded?)", GUNBLADE_GUN_ID);
-				return ItemStack.EMPTY;
+		if (GunbladeItem.isMelee(stack)) {
+			// → 射撃モード: ガンパックが読み込まれているか確認
+			try {
+				if (TimelessAPI.getCommonGunIndex(GUNBLADE_GUN_ID).isEmpty()) {
+					GunAndWeaponMod.LOGGER.warn("Gun index not found: {} (gun pack not loaded?)", GUNBLADE_GUN_ID);
+					player.displayClientMessage(Component.translatable("message.gun_and_weapon.gun_pack_missing"), true);
+					return;
+				}
+			} catch (NoClassDefFoundError e) {
+				return;
 			}
-			return GunItemBuilder.create().setId(GUNBLADE_GUN_ID).setAmmoCount(ammo).setFireMode(FireMode.SEMI).build();
-		} catch (NoClassDefFoundError ignored) {}
-		return ItemStack.EMPTY;
+			CompoundTag tag = stack.getOrCreateTag();
+			// 初回切替時に TACZ 用 NBT を初期化 (以後はスタック内で維持される)
+			if (!tag.contains("GunId")) {
+				tag.putString("GunId", GUNBLADE_GUN_ID.toString());
+			}
+			if (!tag.contains("GunFireMode")) {
+				tag.putString("GunFireMode", "SEMI");
+			}
+			if (!tag.contains("GunCurrentAmmoCount")) {
+				tag.putInt("GunCurrentAmmoCount", 0);
+			}
+			tag.putString(GunbladeItem.TAG_MODE, "ranged");
+			// 射撃モード中は MAW の近接システム (コンボ/チャージ/回避) を無効化
+			tag.putBoolean("maw:no_melee", true);
+			playSwitchSound(player, true);
+		} else {
+			CompoundTag meleeTag = stack.getOrCreateTag();
+			meleeTag.putString(GunbladeItem.TAG_MODE, "melee");
+			meleeTag.remove("maw:no_melee");
+			playSwitchSound(player, false);
+		}
 	}
 
-	private static int readGunAmmo(ItemStack gunStack) {
-		try {
-			IGun iGun = IGun.getIGunOrNull(gunStack);
-			if (iGun != null) return iGun.getCurrentAmmoCount(gunStack);
-		} catch (NoClassDefFoundError ignored) {}
-		return 0;
+	private static void playSwitchSound(Player player, boolean toRanged) {
+		player.level().playSound(null, player.blockPosition(),
+				toRanged ? SoundEvents.IRON_DOOR_OPEN : SoundEvents.IRON_DOOR_CLOSE,
+				SoundSource.PLAYERS, 0.5f, 1.5f);
 	}
 }

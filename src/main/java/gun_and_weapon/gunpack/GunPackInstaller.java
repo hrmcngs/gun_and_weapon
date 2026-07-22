@@ -28,20 +28,62 @@ import gun_and_weapon.GunAndWeaponMod;
 public final class GunPackInstaller {
 
 	private static final String RES = "/assets/gun_and_weapon/custom/gunblade_pack/";
+	private static final String SWORD_MODEL = "/assets/gun_and_weapon/models/item/gunblade_sword.json";
+	private static final String SWORD_TEXTURE = "/assets/gun_and_weapon/textures/item/gunblade.png";
 	private static final String[] STATIC_FILES = {
 			"gunpack.meta.json",
 			"assets/gun_and_weapon/animations/gunblade.animation.json",
-			"assets/gun_and_weapon/display/guns/gunblade_display.json",
 			"assets/gun_and_weapon/lang/en_us.json",
 			"assets/gun_and_weapon/lang/ja_jp.json",
-			"assets/gun_and_weapon/textures/gun/slot/gunblade.png",
-			"assets/gun_and_weapon/textures/gun/hud/gunblade.png",
 			"data/gun_and_weapon/index/guns/gunblade.json",
 			"data/gun_and_weapon/data/guns/gunblade_data.json",
 			"data/gun_and_weapon/recipes/gun/gunblade.json",
 	};
 
 	private GunPackInstaller() {}
+
+	/**
+	 * display json を jar のテンプレートから読み、transform.scale の
+	 * ground / fixed を剣モデルの display.ground / display.fixed の scale で
+	 * 上書きして書き出す (ドロップ・額縁の大きさを剣モードと一致させる)。
+	 */
+	private static void writeDisplayJson(Path packDir) throws java.io.IOException {
+		com.google.gson.Gson gson = new com.google.gson.GsonBuilder().setPrettyPrinting().create();
+		com.google.gson.JsonObject display;
+		try (InputStream is = GunPackInstaller.class.getResourceAsStream(
+				RES + "assets/gun_and_weapon/display/guns/gunblade_display.json")) {
+			if (is == null) throw new java.io.IOException("display json template not found");
+			display = new com.google.gson.Gson().fromJson(
+					new InputStreamReader(is, StandardCharsets.UTF_8), com.google.gson.JsonObject.class);
+		}
+		com.google.gson.JsonObject swordDisplay = null;
+		try (InputStream is = GunPackInstaller.class.getResourceAsStream(SWORD_MODEL)) {
+			if (is != null) {
+				com.google.gson.JsonObject model = new com.google.gson.Gson().fromJson(
+						new InputStreamReader(is, StandardCharsets.UTF_8), com.google.gson.JsonObject.class);
+				if (model.has("display")) swordDisplay = model.getAsJsonObject("display");
+			}
+		}
+		com.google.gson.JsonObject scale = display.getAsJsonObject("transform").getAsJsonObject("scale");
+		scale.add("ground", scaleOf(swordDisplay, "ground"));
+		scale.add("fixed", scaleOf(swordDisplay, "fixed"));
+
+		Path target = packDir.resolve("assets/gun_and_weapon/display/guns/gunblade_display.json");
+		Files.createDirectories(target.getParent());
+		Files.writeString(target, gson.toJson(display), StandardCharsets.UTF_8);
+	}
+
+	/** 剣モデル display.<context>.scale を取得 (無ければ [1,1,1] = vanilla 既定) */
+	private static com.google.gson.JsonArray scaleOf(com.google.gson.JsonObject swordDisplay, String context) {
+		com.google.gson.JsonArray out = new com.google.gson.JsonArray();
+		double v = 1.0;
+		if (swordDisplay != null && swordDisplay.has(context)
+				&& swordDisplay.getAsJsonObject(context).has("scale")) {
+			v = swordDisplay.getAsJsonObject(context).getAsJsonArray("scale").get(0).getAsDouble();
+		}
+		for (int i = 0; i < 3; i++) out.add(v);
+		return out;
+	}
 
 	public static void install() {
 		try {
@@ -71,17 +113,34 @@ public final class GunPackInstaller {
 			Path geoTarget = packDir.resolve("assets/gun_and_weapon/geo_models/gun/gunblade_geo.json");
 			Files.createDirectories(geoTarget.getParent());
 			try (InputStream is = GunPackInstaller.class.getResourceAsStream(
-					"/assets/gun_and_weapon/models/item/gunblade_sword.json")) {
+					SWORD_MODEL)) {
 				if (is == null) throw new IOException("sword model not found");
 				String geoJson = TaczGeoGenerator.generate(new InputStreamReader(is, StandardCharsets.UTF_8));
 				Files.writeString(geoTarget, geoJson, StandardCharsets.UTF_8);
+			}
+
+			// 2.5) display json: ground/fixed スケールを剣モデルの display から導出
+			writeDisplayJson(packDir);
+
+			// 2.6) slot / hud アイコン: 剣モデルの display.gui 構図でレンダリング
+			Path slotTarget = packDir.resolve("assets/gun_and_weapon/textures/gun/slot/gunblade.png");
+			Path hudTarget = packDir.resolve("assets/gun_and_weapon/textures/gun/hud/gunblade.png");
+			Files.createDirectories(slotTarget.getParent());
+			Files.createDirectories(hudTarget.getParent());
+			try (InputStream modelIs = GunPackInstaller.class.getResourceAsStream(SWORD_MODEL);
+			     InputStream texIs = GunPackInstaller.class.getResourceAsStream(SWORD_TEXTURE);
+			     var slotOs = Files.newOutputStream(slotTarget);
+			     var hudOs = Files.newOutputStream(hudTarget)) {
+				if (modelIs != null && texIs != null) {
+					IconRenderer.render(modelIs, texIs, slotOs, hudOs);
+				}
 			}
 
 			// 3) 剣テクスチャ → 銃 uv テクスチャ
 			Path texTarget = packDir.resolve("assets/gun_and_weapon/textures/gun/uv/gunblade.png");
 			Files.createDirectories(texTarget.getParent());
 			try (InputStream is = GunPackInstaller.class.getResourceAsStream(
-					"/assets/gun_and_weapon/textures/item/gunblade.png")) {
+					SWORD_TEXTURE)) {
 				if (is == null) throw new IOException("sword texture not found");
 				Files.copy(is, texTarget, StandardCopyOption.REPLACE_EXISTING);
 			}

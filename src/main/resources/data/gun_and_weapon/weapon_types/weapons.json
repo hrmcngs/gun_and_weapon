@@ -20,28 +20,47 @@
     "    motion.the_four_primitives_and_weapons.gun_and_weapon:charge_smash (技名)",
     "  → 本MODの lang/en_us.json, ja_jp.json で定義。display_name はフォールバック。"
   ],
-
   "types": {
-
     "gunblade": {
       "display_name": "ガンブレード",
       "items": [
         "gun_and_weapon:gunblade_sword"
       ],
       "motions": {
-        "combat": ["thrust", "upper_left_slash", "upper_right_slash", "horizontal_slash", "spin_slash", "gun_and_weapon:charge_smash"],
-        "dash": ["dash_rush", "leap_slash"],
-        "right_click": ["none_right"],
-        "shift_right_click": ["none_shift"]
+        "combat": [
+          "thrust",
+          "upper_left_slash",
+          "upper_right_slash",
+          "horizontal_slash",
+          "spin_slash",
+          "gun_and_weapon:charge_smash"
+        ],
+        "dash": [
+          "dash_rush",
+          "leap_slash"
+        ],
+        "right_click": [
+          "none_right"
+        ],
+        "shift_right_click": [
+          "none_shift"
+        ]
       },
       "default_motions": {
         "first_hit": "upper_right_slash",
         "second_hit": "upper_left_slash",
         "third_hit": "thrust",
-        "charged": "gun_and_weapon:charge_smash"
+        "charged": "gun_and_weapon:charge_smash",
+        "right_click": "none_right",
+        "shift_right_click": "none_shift",
+        "dash": "dash_rush"
       },
-      "preferred_motions": ["thrust", "upper_left_slash", "upper_right_slash", "horizontal_slash"]
+      "preferred_motions": [
+        "thrust",
+        "upper_left_slash",
+        "upper_right_slash",
+        "horizontal_slash"
+      ]
     }
-
   }
 }

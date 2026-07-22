@@ -68,6 +68,59 @@ public class DebugScreenshotter {
 			case "fp" -> mc.options.setCameraType(CameraType.FIRST_PERSON);
 			case "reload" -> mc.reloadResourcePacks();
 			case "closegui" -> mc.setScreen(null);
+			case "combo" -> {
+				// MAWの通常攻撃(コンボ)をサーバー側で直接実行
+				MinecraftServer server = mc.getSingleplayerServer();
+				if (server != null && mc.player != null) {
+					var uuid = mc.player.getUUID();
+					server.execute(() -> {
+						var sp = server.getPlayerList().getPlayer(uuid);
+						if (sp != null) {
+							try {
+								the_four_primitives_and_weapons.events.ChargedAttackHandler.performNormalAttack(sp);
+								GunAndWeaponMod.LOGGER.info("[combo-debug] performNormalAttack called");
+							} catch (Throwable t) {
+								GunAndWeaponMod.LOGGER.error("[combo-debug] failed", t);
+							}
+						}
+					});
+				}
+			}
+			case "lclickon" -> mc.options.keyAttack.setDown(true);
+			case "lclickoff" -> mc.options.keyAttack.setDown(false);
+			case "attackpig" -> {
+				// 照準に依存しない攻撃検証: 最寄りの豚を直接攻撃
+				var level = mc.level;
+				var pigs = level.getEntitiesOfClass(net.minecraft.world.entity.animal.Pig.class,
+						mc.player.getBoundingBox().inflate(5));
+				if (!pigs.isEmpty()) {
+					mc.gameMode.attack(mc.player, pigs.get(0));
+					mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+					GunAndWeaponMod.LOGGER.info("[click-debug] attacked pig directly");
+				} else {
+					GunAndWeaponMod.LOGGER.info("[click-debug] no pig nearby");
+				}
+			}
+			case "attack" -> {
+				// 左クリック攻撃の完全な再現 (ForgeHooks onClickInput → 各modのハンドラ → 攻撃)
+				try {
+					var m = Minecraft.class.getDeclaredMethod("startAttack");
+					m.setAccessible(true);
+					m.invoke(mc);
+				} catch (Exception e) {
+					GunAndWeaponMod.LOGGER.error("attack debug failed", e);
+				}
+			}
+			case "toggle" -> {
+				MinecraftServer server = mc.getSingleplayerServer();
+				if (server != null && mc.player != null) {
+					var uuid = mc.player.getUUID();
+					server.execute(() -> {
+						var sp = server.getPlayerList().getPlayer(uuid);
+						if (sp != null) gun_and_weapon.item.GunbladeModeSwitch.toggle(sp);
+					});
+				}
+			}
 			case "slot1" -> mc.player.getInventory().selected = 0;
 			case "slot2" -> mc.player.getInventory().selected = 1;
 			case "slot3" -> mc.player.getInventory().selected = 2;

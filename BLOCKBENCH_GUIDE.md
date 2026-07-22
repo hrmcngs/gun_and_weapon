@@ -9,11 +9,17 @@
 
 銃側への反映は**二重**に行われる:
 
-1. **実行時 (本命)**: Mod が起動するたびに `TaczGeoGenerator` (Java) が
-   剣モデル→TACZ geo を変換し、剣テクスチャと一緒に
-   `<gamedir>/tacz/gunblade_pack` へ書き出す。
-   → **剣を編集してゲームを再起動するだけで銃も追従**
-   (配布 jar でも同じ仕組みで動く。python 不要)
+1. **実行時 (本命)**: Mod が起動するたびに剣モデルから以下を生成して
+   `<gamedir>/tacz/gunblade_pack` へ書き出す:
+   - **3Dモデル** (`TaczGeoGenerator`): 形状・グループ・シリンダー
+   - **テクスチャ**: 剣テクスチャをコピー
+   - **slot/hud アイコン** (`IconRenderer`): 剣の `display.gui` と同じ構図で描画
+   - **ドロップ時の大きさ**: 剣の `display.ground.scale` から
+   - **額縁の向き・大きさ**: 剣の `display.fixed` から
+     (rotation [rx,ry,rz] → TACZ側 [-rx,-ry,rz] に自動変換)
+
+   → **剣側 (モデル/テクスチャ/display) を編集してゲームを再起動するだけで
+   銃も全部追従** (配布 jar でも同じ仕組みで動く。python 不要)
 2. ビルド時: gradle が `tools/convert_gunblade_geo.py` + `tools/make_icons.py`
    を実行し、リポジトリ内の生成物 (geo / uvテクスチャ / slot・hudアイコン) を
    更新する (エミュレータ検証や Blockbench 直接閲覧用 + アイコン生成)。

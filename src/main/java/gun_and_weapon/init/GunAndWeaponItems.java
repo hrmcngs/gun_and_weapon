@@ -6,7 +6,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 import gun_and_weapon.GunAndWeaponMod;
-import gun_and_weapon.item.GunbladeSwordItem;
+import gun_and_weapon.item.GunbladeItem;
 
 public class GunAndWeaponItems {
 
@@ -14,5 +14,5 @@ public class GunAndWeaponItems {
 			DeferredRegister.create(ForgeRegistries.ITEMS, GunAndWeaponMod.MODID);
 
 	public static final RegistryObject<Item> GUNBLADE_SWORD =
-			REGISTRY.register("gunblade_sword", GunbladeSwordItem::new);
+			REGISTRY.register("gunblade_sword", GunbladeItem::new);
 }
