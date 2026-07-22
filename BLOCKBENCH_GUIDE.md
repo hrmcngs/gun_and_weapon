@@ -7,54 +7,47 @@
 **編集するのは剣モード (`models/item/gunblade_sword.json`) と
 剣テクスチャ (`textures/item/gunblade.png`) だけでOK。**
 
-銃側への反映は**二重**に行われる:
+**Mod が起動するたびに**、剣モデルから銃側のアセットを生成して
+`<gamedir>/tacz/gunblade_pack` へ書き出します:
 
-1. **実行時 (本命)**: Mod が起動するたびに剣モデルから以下を生成して
-   `<gamedir>/tacz/gunblade_pack` へ書き出す:
-   - **3Dモデル** (`TaczGeoGenerator`): 形状・グループ・シリンダー
-   - **テクスチャ**: 剣テクスチャをコピー
-   - **slot/hud アイコン** (`IconRenderer`): 剣の `display.gui` と同じ構図で描画
-   - **ドロップ時の大きさ**: 剣の `display.ground.scale` から
-   - **額縁の向き・大きさ**: 剣の `display.fixed` から
-     (rotation [rx,ry,rz] → TACZ側 [-rx,-ry,rz] に自動変換)
+| 生成されるもの | ソース | 実装 |
+|---|---|---|
+| 3Dモデル (形状・グループ・シリンダー) | 剣モデルの `elements`/`groups` | `TaczGeoGenerator` |
+| 銃のテクスチャ | 剣テクスチャをコピー | `GunPackInstaller` |
+| slot/hud アイコン | 剣の `display.gui` と同じ構図で描画 | `IconRenderer` |
+| ドロップ時の大きさ | 剣の `display.ground.scale` | `GunPackInstaller` |
+| 額縁の向き・大きさ | 剣の `display.fixed` (rotation は [-rx,-ry,rz] に変換) | 同上 |
 
-   → **剣側 (モデル/テクスチャ/display) を編集してゲームを再起動するだけで
-   銃も全部追従** (配布 jar でも同じ仕組みで動く。python 不要)
-2. ビルド時: gradle が `tools/convert_gunblade_geo.py` + `tools/make_icons.py`
-   を実行し、リポジトリ内の生成物 (geo / uvテクスチャ / slot・hudアイコン) を
-   更新する (エミュレータ検証や Blockbench 直接閲覧用 + アイコン生成)。
+→ **剣側 (モデル/テクスチャ/display) を編集してゲームを再起動するだけで
+銃も全部追従**します。配布 jar でも同じ仕組みで動き、外部ツール (python 等) は不要。
 
-※ Java 版 (`TaczGeoGenerator`) と Python 版 (`tools/convert_gunblade_geo.py`) は
-同一の変換規約で、出力の一致を検証済み。骨格やカメラを変える時は両方更新すること。
+※ これらの生成物はリポジトリには置いていません (毎起動時に作られるため)。
+銃側の geo を直接見たい場合は、一度ゲームを起動して
+`run/tacz/gunblade_pack/.../gunblade_geo.json` を開いてください。
+骨格やカメラを恒久的に変えたい場合は `TaczGeoGenerator` を編集します。
 
 - 剣モデルは Blockbench で **Java Block/Item** 形式として開く
 - Outliner の `stock` / `body` / `blade` グループ構成が銃側のボーンになる
 - **3×3×4 のキューブがあるとシリンダー扱い**になり、リロードで回転する
-- 銃側の geo を直接編集した場合、次のビルドで上書きされるので注意
-  (骨格・カメラ等を恒久的に変えたい場合は `tools/convert_gunblade_geo.py` を編集)
-
-ドロップ時・額縁内の大きさは剣モード (バニラ既定: ground 0.25 / fixed 0.5)
-に揃えてあります (`gunblade_display.json` の `transform.scale`)。
+- ドロップ時・額縁の大きさ/向きは剣モデルの `display.ground` / `display.fixed`
+  から自動で取り込まれる (Blockbench の Display タブで調整すればOK)
 
 ## 編集対象ファイル
 
 | 対象 | ファイル | Blockbench形式 |
 |---|---|---|
-| 射撃モード (TACZ銃) | `src/main/resources/assets/gun_and_weapon/custom/gunblade_pack/assets/gun_and_weapon/geo_models/gun/gunblade_geo.json` | **Bedrock Model** |
-| 銃テクスチャ | 同 `.../textures/gun/uv/gunblade.png` (32x32) | — |
-| 近接モード (剣) | `src/main/resources/assets/gun_and_weapon/models/item/gunblade_sword.json` | **Java Block/Item** |
-| 剣テクスチャ | `src/main/resources/assets/gun_and_weapon/textures/item/gunblade.png` | — |
+| **モデル本体** (剣・銃 共通) | `src/main/resources/assets/gun_and_weapon/models/item/gunblade_sword.json` | **Java Block/Item** |
+| **テクスチャ** (剣・銃 共通) | `src/main/resources/assets/gun_and_weapon/textures/item/gunblade.png` (32x32) | — |
 | リロード/inspectモーション | `.../gunblade_pack/assets/gun_and_weapon/animations/gunblade.animation.json` | Bedrock Animation |
 
-## 開き方 (射撃モードの銃)
+## 開き方
 
-1. Blockbench → `File > Open Model` → `gunblade_geo.json` を選択
-   (Bedrock Model として開かれる)
-2. 左下の Textures パネル → `Import Texture` → `textures/gun/uv/gunblade.png` を選択
-3. 編集後は `Ctrl+S` (⌘S) — 同じファイルに Bedrock 形式のまま保存される
+1. Blockbench → `File > Open Model` → `gunblade_sword.json` を選択
+   (Java Block/Item として開かれる)
+2. 編集後は `Ctrl+S` (⌘S)
+3. 反映: `bash run_quick.sh` (dev) / `bash build.sh` して jar を差し替え
 
-反映: `bash build.sh` → ゲーム側の `tacz/gunblade_pack` フォルダを削除して起動
-(dev環境なら `bash run_quick.sh` だけでOK。TACZが毎起動時に再コピーする)
+起動時に銃側アセットが作り直されるので、追加の手順は不要です。
 
 ## ⚠️ 消してはいけないボーン
 
@@ -90,8 +83,8 @@
   - `reload_tactical`: 短縮版
   - `inspect`: 中盤にゆっくり1回転
 - ピボットを動かした場合はアニメの回転中心も変わるので注意
-- `tools/convert_gunblade_geo.py` で再生成しても、3×3×4 キューブが
-  自動的に cylinder へ再割当される
+- シリンダー判定は **サイズ 3×3×4 のキューブ** (`TaczGeoGenerator` が自動割当)。
+  別のキューブにしたい場合はそのサイズに合わせるか、生成側を編集する
 
 ## ⚠️ UVの注意
 
@@ -104,31 +97,24 @@
 
 手の位置はモデルではなく `gunblade.animation.json` の `static_idle` が決めます
 (`lefthand`/`righthand` の rotation/position)。Blockbench の Animate タブで
-`gunblade_geo.json` に対してこのアニメファイルを開けば、プレビューしながら
+一度ゲームを起動して生成された `run/tacz/gunblade_pack/.../gunblade_geo.json`
+に対してこのアニメファイルを開けば、プレビューしながら
 キーフレームを調整できます。リロード (`reload_empty`/`reload_tactical`) と
 `inspect` も同ファイルです。
 
-## アイコン (slot/hud) の再生成
+## MOD アイコン (logo.png) の再生成
 
-モデルを変えたらアイコンも作り直し:
+ゲーム内 Mod 一覧と CurseForge 用のアイコンだけは静的ファイルなので、
+モデルを変えたら手動で作り直します:
 ```
-python3 tools/make_icons.py
+python3 tools/make_logo.py
 ```
-(横視点レンダリングで slot 64x64 / hud 180x60 を自動生成)
+→ `src/main/resources/logo.png` (128x128) と
+`promo/curseforge_icon.png` (400x400) を再生成。
 
-## ゲームを起動せずに見た目を確認する
+(銃の slot/hud アイコンは実行時に自動生成されるので手動作業は不要)
 
-```
-python3 tools/tacz_emu.py   # を import して使う。例は docs/GUNPACK_NOTES.md 参照
-```
-TACZの描画コードを忠実に再現したレンダラで、geo を画像に描画できます。
-UV崩れ・部品の分離はゲームを起動しなくてもここで発見できます。
+## 変換規約の詳細
 
-## ゼロから作り直す場合
-
-Chuzume氏のオリジナル (Java JSON) から変換し直すには:
-```
-python3 tools/convert_gunblade_geo.py
-```
-座標系・回転符号・骨格・カメラ設定込みで `gunblade_geo.json` を再生成します。
-変換規約の詳細は [docs/GUNPACK_NOTES.md](docs/GUNPACK_NOTES.md)。
+座標系・回転符号・UV・必須ボーンなどの詳細は
+[docs/GUNPACK_NOTES.md](docs/GUNPACK_NOTES.md) を参照。

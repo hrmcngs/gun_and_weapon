@@ -248,41 +248,6 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-// =====================================================================
-// ガンブレードのアセット自動生成
-//   剣モデル (models/item/gunblade_sword.json) と剣テクスチャが唯一のソース。
-//   Blockbench で剣側を編集すると、ビルド時に銃側 (TACZ geo / uvテクスチャ /
-//   slot/hud アイコン) が自動で再生成される。
-//   python3 が無い環境 (Windows等) ではスキップされ、コミット済みの
-//   生成物がそのまま使われる。
-// =====================================================================
-tasks.register('generateGunbladeAssets') {
-    def swordModel = file('src/main/resources/assets/gun_and_weapon/models/item/gunblade_sword.json')
-    def swordTex   = file('src/main/resources/assets/gun_and_weapon/textures/item/gunblade.png')
-    def packDir    = 'src/main/resources/assets/gun_and_weapon/custom/gunblade_pack/assets/gun_and_weapon'
-    inputs.files(swordModel, swordTex, 'tools/convert_gunblade_geo.py', 'tools/make_icons.py')
-    outputs.files(
-        file("${packDir}/geo_models/gun/gunblade_geo.json"),
-        file("${packDir}/textures/gun/uv/gunblade.png"),
-        file("${packDir}/textures/gun/slot/gunblade.png"),
-        file("${packDir}/textures/gun/hud/gunblade.png"))
-    onlyIf {
-        def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
-        if (isWindows) return false
-        def check = ['sh', '-c', 'command -v python3'].execute()
-        check.waitFor()
-        if (check.exitValue() != 0) {
-            logger.warn('[addon] python3 が見つからないため gunblade アセット生成をスキップ (コミット済みの生成物を使用)')
-            return false
-        }
-        return true
-    }
-    doLast {
-        exec { commandLine 'python3', 'tools/convert_gunblade_geo.py' }
-        exec { commandLine 'python3', 'tools/make_icons.py' }
-    }
-}
-processResources.dependsOn generateGunbladeAssets
 
 // mods.toml の version を build 時に展開
 processResources {

@@ -24,7 +24,11 @@ import gun_and_weapon.GunAndWeaponMod;
  *       /<command>      … サーバーコマンド実行 (例: /time set day)
  *   通常プレイでは何もしない。
  */
-@Mod.EventBusSubscriber(modid = GunAndWeaponMod.MODID, value = Dist.CLIENT)
+// ===== 一旦無効化 (デバッグ用) =====
+// 開発中の自動スクショ/コマンド駆動テスト用クラス。
+// 使いたい時は下の @Mod.EventBusSubscriber のコメントを外して、
+// 環境変数 GUNBLADE_AUTOSHOT=1 を付けて起動する。
+// @Mod.EventBusSubscriber(modid = GunAndWeaponMod.MODID, value = Dist.CLIENT)
 public class DebugScreenshotter {
 
 	private static final boolean ENABLED = System.getenv("GUNBLADE_AUTOSHOT") != null;
@@ -68,6 +72,49 @@ public class DebugScreenshotter {
 			case "fp" -> mc.options.setCameraType(CameraType.FIRST_PERSON);
 			case "reload" -> mc.reloadResourcePacks();
 			case "closegui" -> mc.setScreen(null);
+			case "testcraft" -> {
+				// バニラレシピが実際に解決できるか検証 (3x3 に材料を並べて matches するか)
+				MinecraftServer server = mc.getSingleplayerServer();
+				if (server != null) {
+					server.execute(() -> {
+						var lvl = server.overworld();
+						var inv = new net.minecraft.world.inventory.CraftingContainer() {
+							final net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> items =
+									net.minecraft.core.NonNullList.withSize(9, net.minecraft.world.item.ItemStack.EMPTY);
+							public int getContainerSize() { return 9; }
+							public boolean isEmpty() { return false; }
+							public net.minecraft.world.item.ItemStack getItem(int i) { return items.get(i); }
+							public net.minecraft.world.item.ItemStack removeItem(int i, int c) { return net.minecraft.world.item.ItemStack.EMPTY; }
+							public net.minecraft.world.item.ItemStack removeItemNoUpdate(int i) { return net.minecraft.world.item.ItemStack.EMPTY; }
+							public void setItem(int i, net.minecraft.world.item.ItemStack st) { items.set(i, st); }
+							public void setChanged() {}
+							public boolean stillValid(net.minecraft.world.entity.player.Player p) { return true; }
+							public void clearContent() {}
+							public int getWidth() { return 3; }
+							public int getHeight() { return 3; }
+							public void fillStackedContents(net.minecraft.world.entity.player.StackedContents c) {}
+							public java.util.List<net.minecraft.world.item.ItemStack> getItems() { return items; }
+						};
+						// パターン: " DI" / "GNI" / "SG "
+						inv.setItem(1, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND));
+						inv.setItem(2, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
+						inv.setItem(3, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GUNPOWDER));
+						inv.setItem(4, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHERITE_SCRAP));
+						inv.setItem(5, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
+						inv.setItem(6, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK));
+						inv.setItem(7, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GUNPOWDER));
+						var opt = server.getRecipeManager().getRecipeFor(
+								net.minecraft.world.item.crafting.RecipeType.CRAFTING, inv, lvl);
+						if (opt.isPresent()) {
+							var result = opt.get().assemble(inv, lvl.registryAccess());
+							GunAndWeaponMod.LOGGER.info("[craft-test] MATCH: {} -> {}",
+									opt.get().getId(), result);
+						} else {
+							GunAndWeaponMod.LOGGER.info("[craft-test] NO MATCH");
+						}
+					});
+				}
+			}
 			case "combo" -> {
 				// MAWの通常攻撃(コンボ)をサーバー側で直接実行
 				MinecraftServer server = mc.getSingleplayerServer();

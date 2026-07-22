@@ -32,6 +32,9 @@ Because both modes are the **same item**, everything carries over seamlessly:
 enchantments (enchanting table & anvil supported — even on the gun), custom names,
 ammo count, fire mode, and any custom NBT.
 
+**Crafting** — choose whichever you like: a **vanilla crafting table** recipe, the
+**Rarity Forge** (The four primitives and Weapons), or the **TACZ Gun Smith Table**.
+
 **Requires:** TACZ (Timeless and Classics Zero) 1.1.7+, The four primitives and Weapons
 
 **Credits:** Original Craftsman Gunblade design, model & texture by **Chuzume**.
@@ -54,6 +57,9 @@ Forge 1.20.1 のMODとして再現したものです。
 
 両モードは**同一アイテム**なので、エンチャント（テーブル・金床対応、銃状態でも
 金床+本で付与可）・名前・残弾・発射モード・カスタムNBTがすべてそのまま引き継がれます。
+
+**クラフト** — **通常のクラフト台** / **レアリティ鍛冶**（The four primitives and
+Weapons）/ **TACZ ガンスミステーブル** の3通りのどれでも作成できます。
 
 **前提MOD:** TACZ (Timeless and Classics Zero) 1.1.7+、The four primitives and Weapons
 

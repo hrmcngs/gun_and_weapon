@@ -4,13 +4,12 @@ Chuzume氏の Java JSON モデルを TACZ (Bedrock geo) に移植する過程で
 
 ## モデル変換 (Java JSON → Bedrock geo)
 
-変換スクリプト: [tools/convert_gunblade_geo.py](../tools/convert_gunblade_geo.py)
-(座標系・骨格・UV変換すべて込み)。
+変換実装: `gun_and_weapon.gunpack.TaczGeoGenerator` (Java・実行時生成)。
+座標系・骨格・UV変換すべて込みで、Mod 起動のたびに剣モデルから geo を作る。
 
-検証は [tools/tacz_emu.py](../tools/tacz_emu.py) — **TACZ の BedrockModel.java /
-BedrockCubePerFace.java (GitHub MCModderAnchor/TACZ 1.20.1) を忠実に再現した
-オフラインレンダラ**。ゲームを起動せずに変換結果を目視検証できる。
-m870 を描画して正しく見えること (=エミュレータ自体の正しさ) を確認済み。
+以下の規約は TACZ のソース (GitHub MCModderAnchor/TACZ 1.20.1 の
+`BedrockModel.java` / `BedrockCubePerFace.java`) を読んで確定させたもの。
+開発時は同等のオフラインレンダラを自作して m870 で校正し、実機でも検証済み。
 
 - **座標系**: X軸ミラー+センタリング `origin_x = 8 - to_x`。y/z はそのまま
   (銃身ラインを m870 に合わせて y を -3.375 シフト)。
@@ -63,12 +62,13 @@ m870 の static_idle の rotation/scale を流用し、position の z だけ
 
 ## その他
 
-- ガンパックは TACZ 1.1.x 公式API `ResourceManager.registerExportResource` で登録。
-  毎起動時に `<gamedir>/tacz/gunblade_pack` へ削除→再コピーされる。
+- ガンパックは自前の `GunPackInstaller` が毎起動時に
+  `<gamedir>/tacz/gunblade_pack` を削除→再生成する
+  (TACZ の `registerExportResource` は jar 内の静的コピーしかできないため不使用)。
 - パック形式: `gunpack.meta.json` は `{"namespace": "gun_and_weapon"}` のみ。
   レガシー形式 (description/version...) は読み込まれない。
 - display json の `slot`/`hud` テクスチャが無いとアイコンがミッシングテクスチャになる。
-  アイコンは `make_geo2.py` 系のスクリプトでモデルから横視点レンダリングして生成。
+  アイコンは `IconRenderer` (Java) が剣モデルの `display.gui` 構図で実行時に描画する。
 - サウンドは他パックの実在ファイルを参照できる (例: `tacz:m870/m870_shoot`)。
   参照先の .ogg が実在するか jar 内 `tacz_sounds/` を確認すること。
 

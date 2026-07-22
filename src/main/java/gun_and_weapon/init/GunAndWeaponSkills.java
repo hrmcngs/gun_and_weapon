@@ -44,7 +44,7 @@ public class GunAndWeaponSkills {
 					(Player player, float chargePercent) ->
 							GunbladeAttacks.executeChargeSmash(player.level(), player));
 
-			GunAndWeaponMod.LOGGER.info("Registered MAW skill: {}", CHARGE_SMASH);
+			GunAndWeaponMod.LOGGER.debug("Registered MAW skill: {}", CHARGE_SMASH);
 		} catch (NoClassDefFoundError e) {
 			GunAndWeaponMod.LOGGER.warn("The four primitives and Weapons not found, skipping skill registration");
 		}

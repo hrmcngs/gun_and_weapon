@@ -32,6 +32,35 @@ public class GunbladeEventHandler {
 	}
 
 	/**
+	 * TACZ ガンスミステーブルで作られた旧形式 (tacz:modern_kinetic_gun +
+	 * GunId=gun_and_weapon:gunblade) を、インベントリ内で統合アイテムへ自動変換する。
+	 * TACZ のレシピ結果は gun/ammo/attachment しか出せないため、テーブルからは
+	 * 一旦 TACZ 銃として出てくる。それをここで拾って本来の姿に直す。
+	 */
+	@SubscribeEvent
+	public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
+		if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
+		Player player = event.player;
+		if (player.level().isClientSide()) return;
+		if (player.tickCount % 20 != 0) return; // 1秒に1回で十分
+
+		var inv = player.getInventory();
+		for (int i = 0; i < inv.getContainerSize(); i++) {
+			ItemStack stack = inv.getItem(i);
+			if (!GunbladeModeSwitch.isLegacyGunForm(stack)) continue;
+			ItemStack unified = new ItemStack(
+					gun_and_weapon.init.GunAndWeaponItems.GUNBLADE_SWORD.get());
+			if (stack.getTag() != null) unified.setTag(stack.getTag().copy());
+			// テーブル製は射撃モードで受け取る (銃として作ったので自然)
+			unified.getOrCreateTag().putString(
+					gun_and_weapon.item.GunbladeItem.TAG_MODE, "ranged");
+			unified.getOrCreateTag().putBoolean("maw:no_melee", true);
+			inv.setItem(i, unified);
+			GunAndWeaponMod.LOGGER.debug("Converted legacy gunblade to unified item (slot {})", i);
+		}
+	}
+
+	/**
 	 * 金床: 射撃モードの銃 + エンチャント本 でエンチャントを付与できるようにする。
 	 * (TACZ の銃アイテムはバニラのエンチャント分類に一致しないため自前で処理。
 	 *  剣モードはバニラの武器分類でそのまま金床/エンチャントテーブル対応)

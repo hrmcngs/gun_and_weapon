@@ -59,7 +59,7 @@ public final class GunbladeInventoryModel {
 		if (gunModel != null && swordModel != null) {
 			models.put(gunKey, new LegacyGunModelWrapper(gunModel, swordModel));
 		}
-		GunAndWeaponMod.LOGGER.info("Gunblade model wrappers installed");
+		GunAndWeaponMod.LOGGER.debug("Gunblade model wrappers installed");
 	}
 
 	/** 委譲ベース */
