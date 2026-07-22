@@ -18,7 +18,13 @@
     "  表示名の翻訳キー:",
     "    weapon_type.the_four_primitives_and_weapons.gunblade (タイプ名)",
     "    motion.the_four_primitives_and_weapons.gun_and_weapon:charge_smash (技名)",
-    "  → 本MODの lang/en_us.json, ja_jp.json で定義。display_name はフォールバック。"
+    "  → 本MODの lang/en_us.json, ja_jp.json で定義。display_name はフォールバック。",
+    "",
+    "【右クリック: バレットステップ / 回避 の切替】",
+    "  既定は none_right = 本MOD独自のバレットステップ (突進攻撃)。",
+    "  スキル画面で右クリックスロットに dodge を選ぶと MAW の回避 (飛び跳ね) に",
+    "  なり、その場合バレットステップは出ない (GunbladeItem.isDodgeSelected で排他)。",
+    "  射撃モードでは maw:no_melee フラグにより どちらも発動しない (エイム優先)。"
   ],
   "types": {
     "gunblade": {
@@ -40,7 +46,8 @@
           "leap_slash"
         ],
         "right_click": [
-          "none_right"
+          "none_right",
+          "dodge"
         ],
         "shift_right_click": [
           "none_shift"

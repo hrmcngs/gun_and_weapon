@@ -139,6 +139,11 @@ public class GunbladeItem extends ModernKineticGunItem {
 			player.startUsingItem(hand);
 			return InteractionResultHolder.consume(stack);
 		}
+		// 右クリックスロットに MAW の「回避」が設定されている場合はバレットステップを
+		// 出さず、MAW の回避システムに任せる (二重発動防止)。
+		if (isDodgeSelected(player, stack)) {
+			return InteractionResultHolder.pass(stack);
+		}
 		// 右クリック = バレットステップ
 		GunbladeAttacks.executeBulletStep(world, player);
 		return InteractionResultHolder.success(stack);
@@ -186,6 +191,21 @@ public class GunbladeItem extends ModernKineticGunItem {
 			list.add(Component.translatable("item.gun_and_weapon.gunblade_sword.tooltip.controls"));
 			list.add(Component.translatable("item.gun_and_weapon.gunblade_sword.tooltip.charge"));
 			list.add(Component.translatable("item.gun_and_weapon.gunblade_sword.tooltip.switch"));
+		}
+	}
+
+	/**
+	 * MAW のスキル画面で右クリックスロットに "dodge" (回避) が
+	 * 設定されているか。設定されていればバレットステップは出さない。
+	 * MAW が無い環境では常に false。
+	 */
+	private static boolean isDodgeSelected(Player player, ItemStack stack) {
+		try {
+			return "dodge".equals(
+					the_four_primitives_and_weapons.events.DodgeAndBattouHandler
+							.resolveRightClickMotion(player, stack));
+		} catch (NoClassDefFoundError | NoSuchMethodError e) {
+			return false;
 		}
 	}
 
