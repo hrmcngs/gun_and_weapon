@@ -191,6 +191,14 @@ public class GunbladeItem extends ModernKineticGunItem {
 	 *
 	 * JSON が読めない / 本体MODが無い場合は既定値にフォールバックする。
 	 */
+	// getAttributeModifiers はバニラの装備比較 (LivingEntity.collectEquipmentChanges)
+	// で毎tick複数回呼ばれるため、値が変わらない限り同じ Multimap を返す。
+	// (値は weapon_stats JSON 由来なのでデータパックリロード時にしか変わらない)
+	private static Multimap<Attribute, AttributeModifier> cachedMeleeAttributes;
+	private static double cachedDamage = Double.NaN;
+	private static double cachedSpeed = Double.NaN;
+	private static Double cachedReach = null;
+
 	private static Multimap<Attribute, AttributeModifier> buildMeleeAttributes(ItemStack stack) {
 		double totalDamage = DEFAULT_ATTACK_DAMAGE;
 		double speed = DEFAULT_ATTACK_SPEED;
@@ -211,6 +219,13 @@ public class GunbladeItem extends ModernKineticGunItem {
 			// 本体MODが無い/APIが変わった場合は既定値のまま
 		}
 
+		Multimap<Attribute, AttributeModifier> cached = cachedMeleeAttributes;
+		if (cached != null && Double.compare(totalDamage, cachedDamage) == 0
+				&& Double.compare(speed, cachedSpeed) == 0
+				&& java.util.Objects.equals(reach, cachedReach)) {
+			return cached;
+		}
+
 		ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
 		// バニラは「基礎1 + modifier」で総攻撃力になる
 		builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(
@@ -221,7 +236,12 @@ public class GunbladeItem extends ModernKineticGunItem {
 			builder.put(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get(), new AttributeModifier(
 					MELEE_REACH_UUID, "Gunblade melee reach", reach, AttributeModifier.Operation.ADDITION));
 		}
-		return builder.build();
+		Multimap<Attribute, AttributeModifier> built = builder.build();
+		cachedDamage = totalDamage;
+		cachedSpeed = speed;
+		cachedReach = reach;
+		cachedMeleeAttributes = built;
+		return built;
 	}
 
 	@Override

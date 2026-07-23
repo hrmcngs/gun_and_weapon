@@ -39,6 +39,13 @@ public final class GunbladeMeleeHud {
 	private static class MeleeAmmoOverlay implements IGuiOverlay {
 		private final GunHudOverlay taczHud = new GunHudOverlay();
 
+		// 毎フレームの ItemStack.copy() (NBT深コピー) を避けるためのキャッシュ。
+		// 元スタック/タグの参照が変わった時だけ作り直す (近接モード中は残弾が
+		// 変化しないため、タグの中身が参照ごと差し替わらない限り表示は同じ)。
+		private ItemStack lastSource = null;
+		private net.minecraft.nbt.CompoundTag lastTag = null;
+		private ItemStack cachedRangedView = ItemStack.EMPTY;
+
 		@Override
 		public void render(net.minecraftforge.client.gui.overlay.ForgeGui gui, GuiGraphics graphics,
 				float partialTick, int screenWidth, int screenHeight) {
@@ -51,11 +58,15 @@ public final class GunbladeMeleeHud {
 			}
 
 			// 射撃モード扱いのコピーを一瞬だけ持たせて TACZ の HUD を描かせる
-			ItemStack rangedView = mainHand.copy();
-			rangedView.getOrCreateTag().putString(GunbladeItem.TAG_MODE, "ranged");
+			if (mainHand != lastSource || mainHand.getTag() != lastTag) {
+				cachedRangedView = mainHand.copy();
+				cachedRangedView.getOrCreateTag().putString(GunbladeItem.TAG_MODE, "ranged");
+				lastSource = mainHand;
+				lastTag = mainHand.getTag();
+			}
 
 			int slot = mc.player.getInventory().selected;
-			mc.player.getInventory().setItem(slot, rangedView);
+			mc.player.getInventory().setItem(slot, cachedRangedView);
 			try {
 				taczHud.render(gui, graphics, partialTick, screenWidth, screenHeight);
 			} catch (Throwable t) {

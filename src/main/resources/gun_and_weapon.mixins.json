@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "gun_and_weapon.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "gun_and_weapon.refmap.json",
+  "client": [
+    "AttachmentItemRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

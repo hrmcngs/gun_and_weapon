@@ -251,13 +251,21 @@ public final class TaczGeoGenerator {
 	 * 動かした時だけ姿を現す = 「装着時かつリロード中のみ表示」。
 	 */
 	private static void addLoaderBones(JsonArray bones, double cx, double cy, double oz) {
-		// --- mag_extended_1: 帯状ストリップ (革の帯) ---
+		// --- mag_extended_1: 帯状ストリップ (革の帯 + 短いシェル2発) ---
+		// push_2 では shell_hand は使わず、この帯自体がシェルを運ぶ見た目にする
+		// (別々に飛ばすと帯の上にシェルが浮いて見えるため)。
+		// シェルは帯の下にぶら下がる短いスタブで、待機時にドラム断面 (±1.5) に収まる寸法。
 		JsonObject strip = bone("mag_extended_1", "cylinder", round(cx), round(cy), round(oz + 2));
 		JsonArray stripCubes = new JsonArray();
 		// 革の帯 (横長・ドラム断面に収まる幅)
 		stripCubes.add(loaderCube(cx - 1.3, cy - 0.35, oz + 3.6, 2.6, 0.7, 0.18, 29, 30));
-		// 上下の縁 (濃い方向け…同色でシンプルに)
+		// 上の縁
 		stripCubes.add(loaderCube(cx - 1.3, cy + 0.35, oz + 3.58, 2.6, 0.14, 0.22, 29, 30));
+		// 帯から下がる短シェル2発 (真鍮リム + 赤ハル)
+		for (double sx : new double[] { -0.65, 0.65 }) {
+			stripCubes.add(loaderCube(cx + sx - 0.28, cy - 0.62, oz + 3.56, 0.56, 0.27, 0.26, 31, 31));
+			stripCubes.add(loaderCube(cx + sx - 0.25, cy - 1.12, oz + 3.58, 0.5, 0.5, 0.22, 30, 30));
+		}
 		strip.add("cubes", stripCubes);
 		bones.add(strip);
 
@@ -279,11 +287,14 @@ public final class TaczGeoGenerator {
 		bones.add(loader);
 
 		// --- shell_hand: 装填ループで手に持って押し込む1発分のシェル ---
-		// 通常時はドラム中心軸の内部に隠しておき、reload_push_* アニメで
+		// 位置はドラム中心ではなく「一番上のチャンバー」(0, +0.85)。
+		// 各プッシュの送り回転で毎回このチャンバーが装填位置に来るため、
+		// 常に端のチャンバーへ込める見た目になる。
+		// 通常時はドラム内部に隠れており、reload_push_* アニメで
 		// 手元 → ドラム後方 → 押し込み (ドラム内=非表示) と動かす。
 		JsonObject shellHand = bone("shell_hand", "cylinder", round(cx), round(cy), round(oz + 2));
 		JsonArray shellCubes = new JsonArray();
-		addShell(shellCubes, cx, cy, oz + 0.8);
+		addShell(shellCubes, cx, cy + 0.85, oz + 0.8);
 		shellHand.add("cubes", shellCubes);
 		bones.add(shellHand);
 	}

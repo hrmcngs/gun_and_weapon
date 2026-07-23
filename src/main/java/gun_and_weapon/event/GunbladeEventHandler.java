@@ -42,7 +42,7 @@ public class GunbladeEventHandler {
 		if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
 		Player player = event.player;
 		if (player.level().isClientSide()) return;
-		if (player.tickCount % 20 != 0) return; // 1秒に1回で十分
+		if (player.tickCount % 100 != 0) return; // 旧形式の変換は5秒に1回で十分
 
 		var inv = player.getInventory();
 		for (int i = 0; i < inv.getContainerSize(); i++) {

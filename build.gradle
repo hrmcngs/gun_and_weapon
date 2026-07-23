@@ -1,6 +1,24 @@
+buildscript {
+    repositories {
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.spongepowered:mixingradle:0.7.+'
+    }
+}
+
 plugins {
     id 'eclipse'
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+}
+
+// Mixin (TACZ の AttachmentItemRenderer に注入して GUI 内 3D 描画を実現する用)
+apply plugin: 'org.spongepowered.mixin'
+
+mixin {
+    add sourceSets.main, 'gun_and_weapon.refmap.json'
+    config 'gun_and_weapon.mixins.json'
 }
 
 // =====================================================================
@@ -248,6 +266,14 @@ dependencies {
 
     // 本体MODの前提 — dev実行時のランタイム用 (本体MODの任意依存)
     runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:5.10.0+1.20.1")
+
+    // JEI — dev実行時のレシピ確認用 (libs/local にベンダリング済み、--offline 可)
+    //   更新する場合: https://maven.blamejared.com/mezz/jei/jei-1.20.1-forge/ から
+    //   jar を落として libs/local/jei/<version>/jei-<version>.jar に置く
+    runtimeOnly fg.deobf("local:jei:1.20.1-forge-15.20.0.135")
+
+    // Mixin アノテーションプロセッサ (refmap 生成用)
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     runtimeOnly fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:4.7.3")
 }
 
@@ -261,6 +287,13 @@ processResources {
     inputs.property 'mod_version', version
     filesMatching('META-INF/mods.toml') {
         expand 'mod_version': version
+    }
+}
+
+// 本番環境で Mixin 設定を読み込ませる (dev は mixingradle が run 引数に追加する)
+tasks.named('jar') {
+    manifest {
+        attributes 'MixinConfigs': 'gun_and_weapon.mixins.json'
     }
 }
 

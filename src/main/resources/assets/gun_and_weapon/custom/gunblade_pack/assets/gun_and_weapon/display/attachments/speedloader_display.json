@@ -2,6 +2,10 @@
   "slot": "gun_and_weapon:attachment/slot/speedloader",
   "model": "gun_and_weapon:attachment/speedloader",
   "texture": "gun_and_weapon:attachment/uv/loaders",
+  "lod": {
+    "model": "gun_and_weapon:attachment/speedloader",
+    "texture": "gun_and_weapon:attachment/uv/loaders"
+  },
   "sounds": {
     "install": "tacz:attachments/extended_mag_install",
     "uninstall": "tacz:attachments/extended_mag_uninstall"
