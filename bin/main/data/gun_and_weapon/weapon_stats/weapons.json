@@ -1,0 +1,22 @@
+{
+  "_comment": [
+    "gun_and_weapon — 武器ステータスファイル",
+    "本体MOD「The four primitives and Weapons」の WeaponStatsRegistry が自動的に読み込む。",
+    "",
+    "元ネタ (Chuzume氏 Craftsman_Arms データパックの Craftsman Gunblade 近接モード):",
+    "  attack_damage +6.0 (計7), attack_speed -2.4, 耐久無限",
+    "types は独自タイプ 'gunblade' の既定値のみ定義する。"
+  ],
+
+  "types": {
+    "gunblade": { "attack_speed": -2.4, "attack_range": 0.5 }
+  },
+
+  "weapons": {
+    "gun_and_weapon:gunblade_sword": {
+      "durability": 0,
+      "enchantability": 10,
+      "attack_damage": 7
+    }
+  }
+}

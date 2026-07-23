@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.entity.shooter.ShooterDataHolder;
 import com.tacz.guns.item.ModernKineticGunItem;
 
@@ -158,6 +159,18 @@ public class GunbladeItem extends ModernKineticGunItem {
 	@Override
 	public UseAnim getUseAnimation(ItemStack stack) {
 		return isMelee(stack) ? UseAnim.BLOCK : super.getUseAnimation(stack);
+	}
+
+	/**
+	 * GunFireMode タグが未初期化 (UNKNOWN) だと、TACZ の ShootKey がクリックの度に
+	 * 「Unknown fire mode, unable to shoot」をチャットへ出してしまう
+	 * (近接モードの新品ガンブレードはタグが無いので毎回出る)。
+	 * → UNKNOWN は SEMI として扱い、メッセージを抑止する。
+	 */
+	@Override
+	public FireMode getFireMode(ItemStack stack) {
+		FireMode mode = super.getFireMode(stack);
+		return mode == FireMode.UNKNOWN ? FireMode.SEMI : mode;
 	}
 
 	@Override

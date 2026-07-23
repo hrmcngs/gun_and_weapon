@@ -32,6 +32,10 @@ public final class GunbladeClientInput {
 	private static int attackHeldTicks = 0;
 	private static boolean burstActive = false;
 
+	/** クロスヘア非表示フラグがこの時間 (tick) 立ちっぱなしなら強制解除する。 */
+	private static final int CROSSHAIR_STUCK_TICKS = 40;
+	private static int crosshairHiddenTicks = 0;
+
 	/**
 	 * 射撃モードで左クリックを {@link #BURST_HOLD_TICKS} 以上長押しすると
 	 * 発射モードを BURST に切り替え、離すと SEMI に戻す。
@@ -72,6 +76,36 @@ public final class GunbladeClientInput {
 				burstActive = false;
 			}
 			attackHeldTicks = 0;
+		}
+
+		unstickCrosshair(mainHand);
+	}
+
+	/**
+	 * TACZ は Lua ステートマシンの shouldHideCrossHair フラグが立っている間
+	 * クロスヘアを描画しない。draw (取り出し) アニメ等で立てたフラグが
+	 * ワールド入場直後などに解除され損ねると、クロスヘアが出ないまま残る。
+	 * → {@link #CROSSHAIR_STUCK_TICKS} 以上立ちっぱなしなら強制解除する。
+	 * (ADS中やリロード中の非表示は別の判定で行われるため、解除しても影響しない)
+	 */
+	private static void unstickCrosshair(ItemStack mainHand) {
+		try {
+			var display = com.tacz.guns.api.TimelessAPI.getGunDisplay(mainHand);
+			if (display.isEmpty()) {
+				crosshairHiddenTicks = 0;
+				return;
+			}
+			var context = display.get().getAnimationStateMachine().getContext();
+			if (context != null && context.shouldHideCrossHair()) {
+				if (++crosshairHiddenTicks >= CROSSHAIR_STUCK_TICKS) {
+					context.setShouldHideCrossHair(false);
+					crosshairHiddenTicks = 0;
+				}
+			} else {
+				crosshairHiddenTicks = 0;
+			}
+		} catch (Throwable ignored) {
+			// TACZ の内部APIが変わっても壊れないように黙殺
 		}
 	}
 

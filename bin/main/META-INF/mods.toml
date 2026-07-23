@@ -4,11 +4,15 @@ license="Academic Free License v3.0"
 
 [[mods]]
 modId="gun_and_weapon"
-version="1.0.0"
-displayName="gun and weapon"
-displayURL="https://mcreator.net"
-credits="Created using mod maker MCreator - https://mcreator.net/about"
-authors="hrmcn, MCreator"
+version="${mod_version}"
+displayName="Craftsman Gunblade"
+logoFile="logo.png"
+credits="Original Craftsman Gunblade by Chuzume - https://github.com/Chuzume/Craftsman_Arms (used with permission)"
+authors="hrmcn"
+description='''
+剣と銃を[F]キーで切り替えるガンブレードを追加。
+TACZ と The four primitives and Weapons の連携アドオン。
+'''
 
 # Start of user code block mod configuration
 # End of user code block mod configuration
@@ -24,10 +28,35 @@ authors="hrmcn, MCreator"
 
 
 # Start of user code block dependencies configuration
+# ===== 前提MOD (未導入なら Forge が起動を止めてエラー画面を出す) =====
+# mandatory=true なので、どちらか欠けていると "Missing or unsupported mandatory
+# dependencies" 画面が表示され、ゲームは起動しない。
+# versionRange は「そのバージョン以上」を意味する。前提MOD側が独自の
+# バージョン表記 (例: "3", "5-beta") でも Maven 解釈で範囲内に入る。
+
+# Forge (mandatory) — 明示しておくとバージョン不一致も検出できる
+[[dependencies.gun_and_weapon]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+# TACZ (Timeless and Classics Zero) — 射撃モードの実体
+#   https://www.curseforge.com/minecraft/mc-mods/timeless-and-classics-zero
 [[dependencies.gun_and_weapon]]
     modId="tacz"
     mandatory=true
     versionRange="[1.1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# The four primitives and Weapons — 近接モーション/スキルシステムの実体
+#   https://github.com/Drowse-Lab/The-four-primitives-and-Weapons
+[[dependencies.gun_and_weapon]]
+    modId="the_four_primitives_and_weapons"
+    mandatory=true
+    versionRange="[0,)"
     ordering="AFTER"
     side="BOTH"
 # End of user code block dependencies configuration

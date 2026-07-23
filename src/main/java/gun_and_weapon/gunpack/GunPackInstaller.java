@@ -38,6 +38,17 @@ public final class GunPackInstaller {
 			"data/gun_and_weapon/index/guns/gunblade.json",
 			"data/gun_and_weapon/data/guns/gunblade_data.json",
 			"data/gun_and_weapon/recipes/gun/gunblade.json",
+			// スピードローダー (円状) / スピードストリップ (帯状) — extended_mag アタッチメント
+			"assets/gun_and_weapon/display/attachments/speedloader_display.json",
+			"assets/gun_and_weapon/textures/attachment/slot/speedloader.png",
+			"data/gun_and_weapon/index/attachments/speedloader.json",
+			"data/gun_and_weapon/data/attachments/speedloader_data.json",
+			"data/gun_and_weapon/recipes/attachments/speedloader.json",
+			"assets/gun_and_weapon/display/attachments/speed_strip_display.json",
+			"assets/gun_and_weapon/textures/attachment/slot/speed_strip.png",
+			"data/gun_and_weapon/index/attachments/speed_strip.json",
+			"data/gun_and_weapon/data/attachments/speed_strip_data.json",
+			"data/gun_and_weapon/recipes/attachments/speed_strip.json",
 	};
 
 	private GunPackInstaller() {}

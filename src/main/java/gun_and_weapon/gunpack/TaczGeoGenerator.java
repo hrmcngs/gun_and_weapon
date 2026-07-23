@@ -193,16 +193,79 @@ public final class TaczGeoGenerator {
 				JsonArray s = c.getAsJsonArray("size");
 				if (s.get(0).getAsDouble() == 3 && s.get(1).getAsDouble() == 3 && s.get(2).getAsDouble() == 4) {
 					JsonArray o = c.getAsJsonArray("origin");
-					cylinder.add("pivot", arr(
-							round(o.get(0).getAsDouble() + 1.5),
-							round(o.get(1).getAsDouble() + 1.5),
-							round(o.get(2).getAsDouble() + 2)));
+					double cx = o.get(0).getAsDouble() + 1.5;
+					double cy = o.get(1).getAsDouble() + 1.5;
+					double oz = o.get(2).getAsDouble();
+					cylinder.add("pivot", arr(round(cx), round(cy), round(oz + 2)));
 					cylinder.getAsJsonArray("cubes").add(c);
 					cubes.remove(i);
+					addCylinderBullets(bones, cx, cy, oz);
 					return;
 				}
 			}
 		}
+	}
+
+	/**
+	 * ドラム内部に 12ゲージシェル (TACZ の tacz:12g と同じ配色: 赤いハル+真鍮ベース) を
+	 * 4チャンバー × 前後2発 = 8発 仕込む (装弾数 8 と一致)。
+	 * チャンバーごとに独立したボーン (bullet_1〜4、cylinder の子) にして、
+	 * リロードアニメで1室ずつ (2発1組で) 装填する動きを付けられるようにする。
+	 * 通常時はドラムに完全に内包されて見えない (TACZ標準銃の bullet ボーンと同じ常設ジオ方式)。
+	 * UV はテクスチャ右下に埋めた 12g パレット (geo空間座標、64px実画像の1/2):
+	 *   赤ハル[30,30] / 暗赤[31,30] / 真鍮[30,31] / 明真鍮[31,31]
+	 */
+	private static void addCylinderBullets(JsonArray bones, double cx, double cy, double oz) {
+		// ドラム軸 (z) の周りにひし形配置 (4室)。z- が銃口側、z+ が後方 (リム)
+		double[][] centers = { { 0, 0.85 }, { 0.85, 0 }, { 0, -0.85 }, { -0.85, 0 } };
+		// スピードローダー1回分 = 4発1組の「段」ボーン。
+		//   bullet_1 = 前段 (奥。最初に装填される)
+		//   bullet_2 = 後段 (手前。2回目に装填される)
+		double[] rowZ = { oz + 0.25, oz + 1.95 };
+		for (int row = 0; row < 2; row++) {
+			JsonObject rowBone = bone("bullet_" + (row + 1), "cylinder", round(cx), round(cy), round(oz + 2));
+			JsonArray cubes = new JsonArray();
+			for (double[] cc : centers) {
+				addShell(cubes, cx + cc[0], cy + cc[1], rowZ[row]);
+			}
+			// スピードローダーの円盤 (濃灰)。段の後端に付き、通常時はドラム内で見えない。
+			// 段が後方へスライドすると円盤ごと出てきて「ローダーで押し込む」見た目になる。
+			cubes.add(bulletCube(cx, cy, 2.6, rowZ[row] + 1.42, 0.12, 0, 0, 0, 0));
+			rowBone.add("cubes", cubes);
+			bones.add(rowBone);
+		}
+	}
+
+	/** 1発分の 12g シェル (ハル+真鍮ベース+リム) を zStart から後方向きに積む */
+	private static void addShell(JsonArray cubes, double bx, double by, double zStart) {
+		// ハル (赤いプラスチック筒。先端 north 面は暗赤 = クリンプ)
+		cubes.add(bulletCube(bx, by, 0.65, zStart, 0.95, 30, 30, 31, 30));
+		// 真鍮ベース
+		cubes.add(bulletCube(bx, by, 0.65, zStart + 0.95, 0.35, 30, 31, 30, 31));
+		// リム (明るい真鍮、一回り太い)
+		cubes.add(bulletCube(bx, by, 0.8, zStart + 1.3, 0.12, 31, 31, 31, 31));
+	}
+
+	/** 中心(bx,by)・断面 w×w・zStart から長さ len のキューブ。側面 UV と 先端(north) UV を指定 */
+	private static JsonObject bulletCube(double bx, double by, double w, double zStart, double len,
+			double u, double v, double frontU, double frontV) {
+		JsonObject cube = new JsonObject();
+		cube.add("origin", arr(round(bx - w / 2), round(by - w / 2), round(zStart)));
+		cube.add("size", arr(w, w, len));
+		JsonObject uv = new JsonObject();
+		for (String face : new String[] { "south", "east", "west", "up", "down" }) {
+			uv.add(face, faceUv(u, v, 0.5, 0.5));
+		}
+		uv.add("north", faceUv(frontU, frontV, 0.5, 0.5));
+		cube.add("uv", uv);
+		return cube;
+	}
+
+	private static JsonObject faceUv(double u, double v, double w, double h) {
+		JsonObject f = new JsonObject();
+		f.add("uv", arr(u, v));
+		f.add("uv_size", arr(w, h));
+		return f;
 	}
 
 	/**

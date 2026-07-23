@@ -1,0 +1,21 @@
+{
+  "materials": [
+    {
+      "item": {
+        "tag": "forge:ingots/iron"
+      },
+      "count": 2
+    },
+    {
+      "item": {
+        "tag": "forge:leather"
+      },
+      "count": 2
+    }
+  ],
+  "result": {
+    "type": "attachment",
+    "id": "gun_and_weapon:speed_strip"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

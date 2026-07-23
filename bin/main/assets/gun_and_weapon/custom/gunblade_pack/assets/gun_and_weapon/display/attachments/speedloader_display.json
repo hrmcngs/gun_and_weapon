@@ -1,0 +1,7 @@
+{
+  "slot": "gun_and_weapon:attachment/slot/speedloader",
+  "sounds": {
+    "install": "tacz:attachments/extended_mag_install",
+    "uninstall": "tacz:attachments/extended_mag_uninstall"
+  }
+}

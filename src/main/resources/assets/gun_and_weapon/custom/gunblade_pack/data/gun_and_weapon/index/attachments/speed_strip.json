@@ -1,0 +1,7 @@
+{
+  "name": "attachment.gun_and_weapon.speed_strip",
+  "display": "gun_and_weapon:speed_strip_display",
+  "data": "gun_and_weapon:speed_strip_data",
+  "type": "extended_mag",
+  "sort": 0
+}

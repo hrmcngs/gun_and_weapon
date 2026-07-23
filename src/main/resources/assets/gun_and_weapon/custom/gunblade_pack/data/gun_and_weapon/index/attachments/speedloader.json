@@ -1,0 +1,7 @@
+{
+  "name": "attachment.gun_and_weapon.speedloader",
+  "display": "gun_and_weapon:speedloader_display",
+  "data": "gun_and_weapon:speedloader_data",
+  "type": "extended_mag",
+  "sort": 1
+}
