@@ -28,7 +28,7 @@ import gun_and_weapon.GunAndWeaponMod;
 // 開発中の自動スクショ/コマンド駆動テスト用クラス。
 // 使いたい時は下の @Mod.EventBusSubscriber のコメントを外して、
 // 環境変数 GUNBLADE_AUTOSHOT=1 を付けて起動する。
-// @Mod.EventBusSubscriber(modid = GunAndWeaponMod.MODID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = GunAndWeaponMod.MODID, value = Dist.CLIENT)
 public class DebugScreenshotter {
 
 	private static final boolean ENABLED = System.getenv("GUNBLADE_AUTOSHOT") != null;
@@ -72,92 +72,6 @@ public class DebugScreenshotter {
 			case "fp" -> mc.options.setCameraType(CameraType.FIRST_PERSON);
 			case "reload" -> mc.reloadResourcePacks();
 			case "closegui" -> mc.setScreen(null);
-			case "testcraft" -> {
-				// バニラレシピが実際に解決できるか検証 (3x3 に材料を並べて matches するか)
-				MinecraftServer server = mc.getSingleplayerServer();
-				if (server != null) {
-					server.execute(() -> {
-						var lvl = server.overworld();
-						var inv = new net.minecraft.world.inventory.CraftingContainer() {
-							final net.minecraft.core.NonNullList<net.minecraft.world.item.ItemStack> items =
-									net.minecraft.core.NonNullList.withSize(9, net.minecraft.world.item.ItemStack.EMPTY);
-							public int getContainerSize() { return 9; }
-							public boolean isEmpty() { return false; }
-							public net.minecraft.world.item.ItemStack getItem(int i) { return items.get(i); }
-							public net.minecraft.world.item.ItemStack removeItem(int i, int c) { return net.minecraft.world.item.ItemStack.EMPTY; }
-							public net.minecraft.world.item.ItemStack removeItemNoUpdate(int i) { return net.minecraft.world.item.ItemStack.EMPTY; }
-							public void setItem(int i, net.minecraft.world.item.ItemStack st) { items.set(i, st); }
-							public void setChanged() {}
-							public boolean stillValid(net.minecraft.world.entity.player.Player p) { return true; }
-							public void clearContent() {}
-							public int getWidth() { return 3; }
-							public int getHeight() { return 3; }
-							public void fillStackedContents(net.minecraft.world.entity.player.StackedContents c) {}
-							public java.util.List<net.minecraft.world.item.ItemStack> getItems() { return items; }
-						};
-						// パターン: " DI" / "GNI" / "SG "
-						inv.setItem(1, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND));
-						inv.setItem(2, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
-						inv.setItem(3, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GUNPOWDER));
-						inv.setItem(4, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHERITE_SCRAP));
-						inv.setItem(5, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
-						inv.setItem(6, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK));
-						inv.setItem(7, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GUNPOWDER));
-						var opt = server.getRecipeManager().getRecipeFor(
-								net.minecraft.world.item.crafting.RecipeType.CRAFTING, inv, lvl);
-						if (opt.isPresent()) {
-							var result = opt.get().assemble(inv, lvl.registryAccess());
-							GunAndWeaponMod.LOGGER.info("[craft-test] MATCH: {} -> {}",
-									opt.get().getId(), result);
-						} else {
-							GunAndWeaponMod.LOGGER.info("[craft-test] NO MATCH");
-						}
-					});
-				}
-			}
-			case "combo" -> {
-				// MAWの通常攻撃(コンボ)をサーバー側で直接実行
-				MinecraftServer server = mc.getSingleplayerServer();
-				if (server != null && mc.player != null) {
-					var uuid = mc.player.getUUID();
-					server.execute(() -> {
-						var sp = server.getPlayerList().getPlayer(uuid);
-						if (sp != null) {
-							try {
-								the_four_primitives_and_weapons.events.ChargedAttackHandler.performNormalAttack(sp);
-								GunAndWeaponMod.LOGGER.info("[combo-debug] performNormalAttack called");
-							} catch (Throwable t) {
-								GunAndWeaponMod.LOGGER.error("[combo-debug] failed", t);
-							}
-						}
-					});
-				}
-			}
-			case "lclickon" -> mc.options.keyAttack.setDown(true);
-			case "lclickoff" -> mc.options.keyAttack.setDown(false);
-			case "attackpig" -> {
-				// 照準に依存しない攻撃検証: 最寄りの豚を直接攻撃
-				var level = mc.level;
-				var pigs = level.getEntitiesOfClass(net.minecraft.world.entity.animal.Pig.class,
-						mc.player.getBoundingBox().inflate(5));
-				if (!pigs.isEmpty()) {
-					mc.gameMode.attack(mc.player, pigs.get(0));
-					mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-					GunAndWeaponMod.LOGGER.info("[click-debug] attacked pig directly");
-				} else {
-					GunAndWeaponMod.LOGGER.info("[click-debug] no pig nearby");
-				}
-			}
-			case "attack" -> {
-				// 左クリック攻撃の完全な再現 (ForgeHooks onClickInput → 各modのハンドラ → 攻撃)
-				try {
-					var m = Minecraft.class.getDeclaredMethod("startAttack");
-					m.setAccessible(true);
-					m.invoke(mc);
-				} catch (Exception e) {
-					GunAndWeaponMod.LOGGER.error("attack debug failed", e);
-				}
-			}
 			case "toggle" -> {
 				MinecraftServer server = mc.getSingleplayerServer();
 				if (server != null && mc.player != null) {

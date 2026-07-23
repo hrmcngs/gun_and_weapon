@@ -55,6 +55,12 @@ public class GunAndWeaponMod {
 		GunAndWeaponItems.REGISTRY.register(bus);
 		GunAndWeaponTabs.REGISTRY.register(bus);
 
+		// Register network messages
+		addNetworkMessage(gun_and_weapon.network.FireModeMessage.class,
+				(msg, buf) -> msg.encode(buf),
+				buf -> new gun_and_weapon.network.FireModeMessage(buf),
+				(msg, ctx) -> msg.handle(ctx));
+
 		// Register MAW (The four primitives and Weapons) special skills
 		bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) ->
 				event.enqueueWork(gun_and_weapon.init.GunAndWeaponSkills::register));

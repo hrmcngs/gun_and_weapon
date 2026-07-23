@@ -56,7 +56,8 @@
   },
   "crawl_recoil_multiplier": 0.6,
   "fire_mode": [
-    "semi"
+    "semi",
+    "burst"
   ],
   "recoil": {
     "pitch": [
@@ -132,5 +133,11 @@
       "prep": 0.12
     }
   },
-  "allow_attachment_types": []
+  "allow_attachment_types": [],
+  "burst_data": {
+    "continuous_shoot": true,
+    "count": 3,
+    "bpm": 900,
+    "min_interval": 0.3
+  }
 }

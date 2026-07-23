@@ -66,7 +66,7 @@ notificationDisplayTime:1.0
 mipmapLevels:2
 useNativeTransport:true
 mainHand:"right"
-attackIndicator:1
+attackIndicator:0
 narrator:0
 tutorialStep:none
 mouseWheelSensitivity:1.0

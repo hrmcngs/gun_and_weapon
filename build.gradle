@@ -192,7 +192,14 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.disableRefMap', 'true'
+            // ----- dev実行時の mixin refmap remap 設定 -----
+            // 前提MOD (The four primitives and Weapons など) の jar 内 mixin の refmap は
+            // SRG 名で書かれているため、official mapping の dev 環境では
+            // そのままだと mixin がターゲットを見つけられず適用されない。
+            // (例: MAW の WeaponStatsMixin が効かず weapon_stats が反映されない)
+            // mixin.env.remapRefMap=true で runtime に SRG→official 変換を行わせる。
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg".toString()
 
             mods {
                 examplemod {

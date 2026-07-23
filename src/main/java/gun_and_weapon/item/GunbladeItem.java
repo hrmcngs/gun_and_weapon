@@ -12,7 +12,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -48,12 +47,14 @@ public class GunbladeItem extends ModernKineticGunItem {
 	public static final String TAG_MODE = "gunblade:mode";
 	public static final int MAX_AMMO = 8;
 
-	/** 近接モードの攻撃属性 (元データパック準拠: 攻撃力+6=計7 / 攻撃速度-2.4) */
+	/** 近接モードの攻撃属性 UUID */
 	private static final UUID MELEE_DAMAGE_UUID = UUID.fromString("5c9271fa-6f42-4c8b-9df2-7e1a63b3c101");
 	private static final UUID MELEE_SPEED_UUID = UUID.fromString("5c9271fa-6f42-4c8b-9df2-7e1a63b3c102");
-	private static final Multimap<Attribute, AttributeModifier> MELEE_ATTRIBUTES = ImmutableMultimap.of(
-			Attributes.ATTACK_DAMAGE, new AttributeModifier(MELEE_DAMAGE_UUID, "Gunblade melee damage", 6.0, AttributeModifier.Operation.ADDITION),
-			Attributes.ATTACK_SPEED, new AttributeModifier(MELEE_SPEED_UUID, "Gunblade melee speed", -2.4, AttributeModifier.Operation.ADDITION));
+	private static final UUID MELEE_REACH_UUID = UUID.fromString("5c9271fa-6f42-4c8b-9df2-7e1a63b3c103");
+
+	/** weapon_stats JSON が読めない場合の既定値 (元データパック準拠: 総攻撃力7 / 攻撃速度-2.4) */
+	private static final double DEFAULT_ATTACK_DAMAGE = 7.0;
+	private static final double DEFAULT_ATTACK_SPEED = -2.4;
 
 	public static boolean isMelee(ItemStack stack) {
 		CompoundTag tag = stack.getTag();
@@ -162,19 +163,52 @@ public class GunbladeItem extends ModernKineticGunItem {
 	@Override
 	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
 		if (slot == EquipmentSlot.MAINHAND && isMelee(stack)) {
-			return MELEE_ATTRIBUTES;
+			return buildMeleeAttributes(stack);
 		}
 		return super.getAttributeModifiers(slot, stack);
 	}
 
-	@Override
-	public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean selected) {
-		super.inventoryTick(stack, world, entity, slot, selected);
-		if (world.isClientSide() || !(entity instanceof Player player) || !selected) return;
-		if (!isMelee(stack)) return;
-		int ammo = getCurrentAmmoCount(stack);
-		player.displayClientMessage(
-				Component.translatable("hud.gun_and_weapon.gunblade_melee", ammo, MAX_AMMO), true);
+	/**
+	 * 近接モードの属性を data/gun_and_weapon/weapon_stats/weapons.json から組み立てる。
+	 *
+	 * 本来これは本体MODの WeaponStatsMixin が全武器に対して行う処理だが、
+	 * そのミックスインは mixins.json に登録されておらず適用されないため、
+	 * ガンブレードは自前で JSON を読んで反映する
+	 * (将来ミックスインが有効化されても同じ値で上書きされるだけなので競合しない)。
+	 *
+	 * JSON が読めない / 本体MODが無い場合は既定値にフォールバックする。
+	 */
+	private static Multimap<Attribute, AttributeModifier> buildMeleeAttributes(ItemStack stack) {
+		double totalDamage = DEFAULT_ATTACK_DAMAGE;
+		double speed = DEFAULT_ATTACK_SPEED;
+		Double reach = null;
+
+		try {
+			var stats = the_four_primitives_and_weapons.skill.WeaponStatsRegistry.getStats(stack);
+			if (stats != null) {
+				if (!Float.isNaN(stats.attackDamage)) {
+					totalDamage = stats.attackDamage;
+				} else if (!Float.isNaN(stats.damageBonus)) {
+					totalDamage = DEFAULT_ATTACK_DAMAGE + stats.damageBonus;
+				}
+				if (!Float.isNaN(stats.attackSpeed)) speed = stats.attackSpeed;
+				if (!Float.isNaN(stats.attackRange)) reach = (double) stats.attackRange;
+			}
+		} catch (NoClassDefFoundError | NoSuchMethodError ignored) {
+			// 本体MODが無い/APIが変わった場合は既定値のまま
+		}
+
+		ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+		// バニラは「基礎1 + modifier」で総攻撃力になる
+		builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(
+				MELEE_DAMAGE_UUID, "Gunblade melee damage", totalDamage - 1.0, AttributeModifier.Operation.ADDITION));
+		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(
+				MELEE_SPEED_UUID, "Gunblade melee speed", speed, AttributeModifier.Operation.ADDITION));
+		if (reach != null && reach != 0.0) {
+			builder.put(net.minecraftforge.common.ForgeMod.ENTITY_REACH.get(), new AttributeModifier(
+					MELEE_REACH_UUID, "Gunblade melee reach", reach, AttributeModifier.Operation.ADDITION));
+		}
+		return builder.build();
 	}
 
 	@Override
