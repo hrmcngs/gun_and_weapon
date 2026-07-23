@@ -53,6 +53,10 @@ public final class GunPackInstaller {
 			"assets/gun_and_weapon/geo_models/attachment/speedloader.json",
 			"assets/gun_and_weapon/geo_models/attachment/speed_strip.json",
 			"assets/gun_and_weapon/textures/attachment/uv/loaders.png",
+			// ガンブレードに装着できるアタッチメントの適合表 (これが無いと装着不可)
+			"data/gun_and_weapon/tacz_tags/attachments/allow_attachments/gunblade.json",
+			// リロードのLuaステートマシン (1発ずつ/2発ずつ/4発ずつ装填の切替)
+			"assets/gun_and_weapon/scripts/gunblade_state_machine.lua",
 	};
 
 	private GunPackInstaller() {}

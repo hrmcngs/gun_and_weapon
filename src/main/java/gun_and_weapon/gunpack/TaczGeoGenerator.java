@@ -99,6 +99,12 @@ public final class TaczGeoGenerator {
 		JsonObject refitView = bone("refit_view", "views", 20, 9, -2);
 		refitView.add("rotation", arr(0, 90, 0));
 		bones.add(refitView);
+		// 改造画面で拡張マガジンスロットを選んだ時のカメラ。
+		// TACZ は refit_<type>_view という名前のボーンを探す — 無いとカメラが
+		// 原点に飛んで変な場所を映すため、シリンダーが中央に来る位置に置く。
+		JsonObject refitMagView = bone("refit_extended_mag_view", "views", 12, 10.5, 4);
+		refitMagView.add("rotation", arr(0, 90, 0));
+		bones.add(refitMagView);
 		// ===== 表示位置 =====
 		bones.add(bone("positioning", null, 0, 0, 0));
 		JsonObject fixed = bone("fixed", "positioning", 1.35, 8.275, -0.05);
@@ -258,9 +264,11 @@ public final class TaczGeoGenerator {
 		// --- mag_extended_2: 円状スピードローダー (灰色の円盤 + ノブ) ---
 		JsonObject loader = bone("mag_extended_2", "cylinder", round(cx), round(cy), round(oz + 2));
 		JsonArray loaderCubes = new JsonArray();
-		// 円盤2枚を45°クロスで八角形風に
-		JsonObject discA = loaderCube(cx - 1.3, cy - 1.3, oz + 3.55, 2.6, 2.6, 0.2, 28, 30);
-		JsonObject discB = loaderCube(cx - 1.3, cy - 1.3, oz + 3.55, 2.6, 2.6, 0.2, 28, 30);
+		// 円盤2枚を45°クロスで八角形風に。
+		// 45°回転した正方形の対角半径 (辺×√2/2) がドラム半径 1.5 を超えないよう
+		// 2.0×2.0 に抑える (対角半径 1.41)。大きくするとドラム側面から突き出る。
+		JsonObject discA = loaderCube(cx - 1.0, cy - 1.0, oz + 3.55, 2.0, 2.0, 0.2, 28, 30);
+		JsonObject discB = loaderCube(cx - 1.0, cy - 1.0, oz + 3.55, 2.0, 2.0, 0.2, 28, 30);
 		discB.add("rotation", arr(0, 0, 45));
 		discB.add("pivot", arr(round(cx), round(cy), round(oz + 3.65)));
 		loaderCubes.add(discA);
@@ -269,6 +277,15 @@ public final class TaczGeoGenerator {
 		loaderCubes.add(loaderCube(cx - 0.45, cy - 0.45, oz + 3.75, 0.9, 0.9, 0.22, 28, 30));
 		loader.add("cubes", loaderCubes);
 		bones.add(loader);
+
+		// --- shell_hand: 装填ループで手に持って押し込む1発分のシェル ---
+		// 通常時はドラム中心軸の内部に隠しておき、reload_push_* アニメで
+		// 手元 → ドラム後方 → 押し込み (ドラム内=非表示) と動かす。
+		JsonObject shellHand = bone("shell_hand", "cylinder", round(cx), round(cy), round(oz + 2));
+		JsonArray shellCubes = new JsonArray();
+		addShell(shellCubes, cx, cy, oz + 0.8);
+		shellHand.add("cubes", shellCubes);
+		bones.add(shellHand);
 	}
 
 	/** 単色UVのキューブ (origin指定版) */
