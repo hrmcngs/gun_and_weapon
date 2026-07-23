@@ -28,7 +28,7 @@ import gun_and_weapon.GunAndWeaponMod;
 // 開発中の自動スクショ/コマンド駆動テスト用クラス。
 // 使いたい時は下の @Mod.EventBusSubscriber のコメントを外して、
 // 環境変数 GUNBLADE_AUTOSHOT=1 を付けて起動する。
-@Mod.EventBusSubscriber(modid = GunAndWeaponMod.MODID, value = Dist.CLIENT)
+// @Mod.EventBusSubscriber(modid = GunAndWeaponMod.MODID, value = Dist.CLIENT)
 public class DebugScreenshotter {
 
 	private static final boolean ENABLED = System.getenv("GUNBLADE_AUTOSHOT") != null;
