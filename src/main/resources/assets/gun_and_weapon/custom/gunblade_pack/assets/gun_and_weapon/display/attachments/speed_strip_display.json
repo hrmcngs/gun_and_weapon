@@ -1,5 +1,7 @@
 {
   "slot": "gun_and_weapon:attachment/slot/speed_strip",
+  "model": "gun_and_weapon:attachment/speed_strip",
+  "texture": "gun_and_weapon:attachment/uv/loaders",
   "sounds": {
     "install": "tacz:attachments/extended_mag_install",
     "uninstall": "tacz:attachments/extended_mag_uninstall"

@@ -228,12 +228,61 @@ public final class TaczGeoGenerator {
 			for (double[] cc : centers) {
 				addShell(cubes, cx + cc[0], cy + cc[1], rowZ[row]);
 			}
-			// スピードローダーの円盤 (濃灰)。段の後端に付き、通常時はドラム内で見えない。
-			// 段が後方へスライドすると円盤ごと出てきて「ローダーで押し込む」見た目になる。
-			cubes.add(bulletCube(cx, cy, 2.6, rowZ[row] + 1.42, 0.12, 0, 0, 0, 0));
 			rowBone.add("cubes", cubes);
 			bones.add(rowBone);
 		}
+		addLoaderBones(bones, cx, cy, oz);
+	}
+
+	/**
+	 * 装填道具の可視化ボーン。TACZ は mag_extended_N という名前のボーンを
+	 * 「レベルNの拡張マガジン装着中のみ」描画する (BedrockGunModel の機能ボーン)。
+	 * これを利用して:
+	 *   mag_extended_1 = 帯状スピードストリップ (level 1)
+	 *   mag_extended_2 = 円状スピードローダー (level 2)
+	 * ジオメトリはドラム後端の内部 (z = oz+3.5〜3.98) に置いてあり、
+	 * 通常時はドラムに隠れて見えない。リロードアニメがボーンを後方へ
+	 * 動かした時だけ姿を現す = 「装着時かつリロード中のみ表示」。
+	 */
+	private static void addLoaderBones(JsonArray bones, double cx, double cy, double oz) {
+		// --- mag_extended_1: 帯状ストリップ (革の帯) ---
+		JsonObject strip = bone("mag_extended_1", "cylinder", round(cx), round(cy), round(oz + 2));
+		JsonArray stripCubes = new JsonArray();
+		// 革の帯 (横長・ドラム断面に収まる幅)
+		stripCubes.add(loaderCube(cx - 1.3, cy - 0.35, oz + 3.6, 2.6, 0.7, 0.18, 29, 30));
+		// 上下の縁 (濃い方向け…同色でシンプルに)
+		stripCubes.add(loaderCube(cx - 1.3, cy + 0.35, oz + 3.58, 2.6, 0.14, 0.22, 29, 30));
+		strip.add("cubes", stripCubes);
+		bones.add(strip);
+
+		// --- mag_extended_2: 円状スピードローダー (灰色の円盤 + ノブ) ---
+		JsonObject loader = bone("mag_extended_2", "cylinder", round(cx), round(cy), round(oz + 2));
+		JsonArray loaderCubes = new JsonArray();
+		// 円盤2枚を45°クロスで八角形風に
+		JsonObject discA = loaderCube(cx - 1.3, cy - 1.3, oz + 3.55, 2.6, 2.6, 0.2, 28, 30);
+		JsonObject discB = loaderCube(cx - 1.3, cy - 1.3, oz + 3.55, 2.6, 2.6, 0.2, 28, 30);
+		discB.add("rotation", arr(0, 0, 45));
+		discB.add("pivot", arr(round(cx), round(cy), round(oz + 3.65)));
+		loaderCubes.add(discA);
+		loaderCubes.add(discB);
+		// 背面ノブ (ドラム後端 oz+4 の内側に収める)
+		loaderCubes.add(loaderCube(cx - 0.45, cy - 0.45, oz + 3.75, 0.9, 0.9, 0.22, 28, 30));
+		loader.add("cubes", loaderCubes);
+		bones.add(loader);
+	}
+
+	/** 単色UVのキューブ (origin指定版) */
+	private static JsonObject loaderCube(double ox, double oy, double oz, double w, double h, double d,
+			double u, double v) {
+		JsonObject cube = new JsonObject();
+		cube.add("origin", arr(round(ox), round(oy), round(oz)));
+		cube.add("size", arr(w, h, d));
+		JsonObject uv = new JsonObject();
+		for (String face : new String[] { "north", "south", "east", "west", "up", "down" }) {
+			uv.add(face, faceUv(u, v, 0.5, 0.5));
+		}
+		cube.add("uv", uv);
+		return cube;
 	}
 
 	/** 1発分の 12g シェル (ハル+真鍮ベース+リム) を zStart から後方向きに積む */

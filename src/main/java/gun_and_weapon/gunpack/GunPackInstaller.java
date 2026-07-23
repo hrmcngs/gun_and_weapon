@@ -49,6 +49,10 @@ public final class GunPackInstaller {
 			"data/gun_and_weapon/index/attachments/speed_strip.json",
 			"data/gun_and_weapon/data/attachments/speed_strip_data.json",
 			"data/gun_and_weapon/recipes/attachments/speed_strip.json",
+			// アタッチメントの3Dモデル (アイテム表示用)
+			"assets/gun_and_weapon/geo_models/attachment/speedloader.json",
+			"assets/gun_and_weapon/geo_models/attachment/speed_strip.json",
+			"assets/gun_and_weapon/textures/attachment/uv/loaders.png",
 	};
 
 	private GunPackInstaller() {}
