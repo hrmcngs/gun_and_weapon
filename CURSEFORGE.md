@@ -19,12 +19,12 @@ Forge 1.20.1 as a fully-featured hybrid weapon.
 
 **One item, two modes** — press **[F]** (swap-hands key) to transform:
 
-- ⚔ **Melee mode** — a heavy blade with vanilla combat, combo motions & slash effects
+-  **Melee mode** — a heavy blade with vanilla combat, combo motions & slash effects
   (The four primitives and Weapons), Bullet Step dash (right-click), guard
   (sneak + right-click), and the **Charge Smash**: hold left-click to charge, then
   unleash rings of fire that consume your entire magazine — the more shells spent,
   the harder it hits.
-- 🔫 **Ranged mode** — a genuine TACZ 12-gauge: aiming, recoil, revolver-style
+-  **Ranged mode** — a genuine TACZ 12-gauge: aiming, recoil, revolver-style
   reload animation with a spinning cylinder, and a cylinder that turns with
   every shot.
 
