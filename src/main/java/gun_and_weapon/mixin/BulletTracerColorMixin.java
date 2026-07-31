@@ -7,15 +7,11 @@ import com.tacz.guns.entity.EntityKineticBullet;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
-import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import the_four_primitives_and_weapons.damage.ElementType;
-import the_four_primitives_and_weapons.damage.ElementalParticles;
 
 import gun_and_weapon.util.GunElements;
 
@@ -66,12 +62,7 @@ public abstract class BulletTracerColorMixin {
 		if (!(self.getOwner() instanceof LivingEntity shooter)) return null;
 
 		ItemStack gun = GunElements.findGun(shooter, self.getGunId());
-		ElementType type = GunElements.primary(gun);
-		Vector3f color = type == ElementType.NONE ? null : ElementalParticles.colorOf(type);
-
-		gunAndWeapon$tracerColor = color == null
-				? null
-				: new float[] { color.x(), color.y(), color.z(), 1.0f };
+		gunAndWeapon$tracerColor = GunElements.emissiveColor(gun);
 		gunAndWeapon$elementResolved = true;
 		return gunAndWeapon$tracerColor;
 	}

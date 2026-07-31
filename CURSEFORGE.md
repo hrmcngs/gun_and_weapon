@@ -32,6 +32,12 @@ Because both modes are the **same item**, everything carries over seamlessly:
 enchantments (enchanting table & anvil supported — even on the gun), custom names,
 ammo count, fire mode, and any custom NBT.
 
+**Elemental gunplay** — put an element from *The four primitives and Weapons* on the
+gunblade and the shot itself changes: the tracer and the muzzle flash are tinted with
+that element's colour, and the bullet leaves a trail of that element's particles —
+flames for fire, snowflakes for ice, sparks for lightning, soul flames for soul fire.
+Weapons carrying an element pair alternate both along the trail.
+
 **Crafting** — choose whichever you like: a **vanilla crafting table** recipe, the
 **Rarity Forge** (The four primitives and Weapons), or the **TACZ Gun Smith Table**.
 
@@ -57,6 +63,11 @@ Forge 1.20.1 のMODとして再現したものです。
 
 両モードは**同一アイテム**なので、エンチャント（テーブル・金床対応、銃状態でも
 金床+本で付与可）・名前・残弾・発射モード・カスタムNBTがすべてそのまま引き継がれます。
+
+**属性射撃** — The four primitives and Weapons の属性を付けると射撃の見た目も変わります。
+曳光弾とマズルフラッシュがその属性の色になり、弾道には属性のパーティクルが残ります
+（炎ならFLAME、氷なら雪片、電気・雷なら電光、燐火なら青い魂炎…）。
+属性が2つ付いた武器では、軌跡に2種類が交互に乗ります。
 
 **クラフト** — **通常のクラフト台** / **レアリティ鍛冶**（The four primitives and
 Weapons）/ **TACZ ガンスミステーブル** の3通りのどれでも作成できます。

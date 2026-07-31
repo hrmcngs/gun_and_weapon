@@ -6,7 +6,8 @@
   "refmap": "gun_and_weapon.refmap.json",
   "client": [
     "AttachmentItemRendererMixin",
-    "BulletTracerColorMixin"
+    "BulletTracerColorMixin",
+    "MuzzleFlashColorMixin"
   ],
   "injectors": {
     "defaultRequire": 0

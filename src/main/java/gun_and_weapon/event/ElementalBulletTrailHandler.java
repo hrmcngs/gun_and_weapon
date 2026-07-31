@@ -209,7 +209,14 @@ public final class ElementalBulletTrailHandler {
 		return accentOf(type) != null;
 	}
 
-	/** 属性の質感を出す粒。 dust だけの属性 (風/聖/闇/消滅/侵食/瘴気) は null。 */
+	/**
+	 * 属性の質感を出す粒。
+	 *
+	 * <p>前半は MAW の {@code ElementalParticles} と同じ組み合わせ。
+	 * 後半 (風/聖/闇/消滅/侵食/瘴気) は MAW 側では dust だけで表現されている属性で、
+	 * dust を使わない以上ここで何か当てないと軌跡が完全に無地になってしまうため、
+	 * 属性色に近い dust 以外の粒を当てている。</p>
+	 */
 	private static ParticleOptions accentOf(ElementType type) {
 		if (type == null) return null;
 		switch (type) {
@@ -221,7 +228,14 @@ public final class ElementalBulletTrailHandler {
 			case FIRE:      return ParticleTypes.FLAME;
 			case SOUL:      return ParticleTypes.SOUL;
 			case SOUL_FIRE: return ParticleTypes.SOUL_FIRE_FLAME;
-			default:        return null;
+			// ここから下は MAW では dust のみの属性 (gun_and_weapon 側の補完)
+			case WIND:      return ParticleTypes.CLOUD;          // 白い風の塊
+			case HOLY:      return ParticleTypes.END_ROD;        // 金白の輝き
+			case DARK:      return ParticleTypes.SMOKE;          // 黒い煙
+			case ERASURE:   return ParticleTypes.REVERSE_PORTAL; // 消滅の紫の粒
+			case CORROSION: return ParticleTypes.CRIMSON_SPORE;  // 侵食の赤紫の胞子
+			case MIASMA:    return ParticleTypes.WITCH;          // 瘴気の紫の魔法粒
+			default:        return null;                          // NONE
 		}
 	}
 
