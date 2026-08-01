@@ -55,6 +55,7 @@ public abstract class MuzzleFlashColorMixin {
 
 	/** 撃った銃 ( = 自分のメインハンド ) の属性色。 属性が無ければ null。 */
 	private static float[] gunAndWeapon$elementColor() {
+		if (!gun_and_weapon.config.GunAndWeaponConfig.muzzleFlashColor) return null;
 		LocalPlayer player = Minecraft.getInstance().player;
 		return player == null ? null : GunElements.emissiveColor(player.getMainHandItem());
 	}

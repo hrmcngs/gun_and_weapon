@@ -67,14 +67,24 @@ public final class GunElements {
 	/**
 	 * 発光描画 ( 曳光弾 / マズルフラッシュ ) に乗せる属性色 (RGBA)。 属性が無ければ null。
 	 *
-	 * <p>これらは白いテクスチャに色を<b>乗算</b>して描かれるので、渡す色がそのまま見た目になる。
-	 * ところが MAW の属性色は dust 用の淡い色で、聖 {@code (1.00, 0.97, 0.72)} や
-	 * 雷 {@code (0.80, 0.90, 1.00)} のように<b>ほぼ白</b>のものが多く、そのまま乗算しても
-	 * 白いフラッシュのままで「色が変わっていない」ように見える
-	 * ( 明度を上げるだけでも同じ。 白に近い色は明るくしても白 )。</p>
+	 * <p><b>色の出どころは MAW の {@link ElementalParticles#colorOf} だけ</b>。
+	 * MAW 側がツールチップの固定16進カラー表を廃止して粒子色を唯一の基準に統一した変更に合わせてあり、
+	 * 本体側で属性色を変えれば曳光弾・マズルフラッシュ・軌跡すべてが自動で追従する
+	 * ( こちらに属性ごとの色表は持たない )。</p>
 	 *
-	 * <p>そこで色相は保ったまま、彩度を {@link #MIN_SATURATION} 以上・明度を最大に引き上げてから渡す。
-	 * 聖なら鮮やかな金、雷なら鮮やかな青、闇なら鮮やかな紫になる。</p>
+	 * <p>ただし<b>色相以外はそのまま使えない</b>。 これらは白いテクスチャに色を<b>乗算</b>して
+	 * 描かれるため、渡した色がそのまま見た目になる。 MAW の属性色は dust 用の淡い色で、
+	 * 聖 {@code (1.00, 0.97, 0.72)} や雷 {@code (0.80, 0.90, 1.00)} のように<b>ほぼ白</b>のものが多く、
+	 * そのまま乗算すると白いフラッシュのままで「色が変わっていない」ように見える
+	 * ( 明度を上げるだけでも同じ。 白に近い色は明るくしても白 )。
+	 * 文字色として暗い背景に置くツールチップと違い、発光描画では彩度が要る。</p>
+	 *
+	 * <p>そこで<b>彩度だけ</b>を {@link #MIN_SATURATION} 以上に引き上げ、色相と<b>明るさは MAW の色のまま</b>にする。
+	 * 聖 (明るい) なら鮮やかな金、雷なら鮮やかな青。 闇 {@code (0.16, 0.10, 0.22)} や
+	 * 消滅のように元から暗い属性は暗いまま ( ほぼ黒い紫 ) になり、闇らしさが保たれる。</p>
+	 *
+	 * <p>色を変えたい場合は MAW 側の {@code colorOf} を直せばここも追従する。
+	 * ツールチップと完全に同じ色にしたい場合は {@link #vivid} を通さず色をそのまま返せばよい。</p>
 	 */
 	public static float[] emissiveColor(ItemStack gun) {
 		ElementType type = primary(gun);
@@ -89,7 +99,11 @@ public final class GunElements {
 		return vivid(color);
 	}
 
-	/** 色相を保ったまま彩度・明度を上げる (HSV で S >= {@link #MIN_SATURATION}, V = 1)。 */
+	/**
+	 * 色相と明るさは保ったまま彩度だけ上げる (HSV で S >= {@link #MIN_SATURATION}, V は元のまま)。
+	 *
+	 * <p>V を 1 に固定すると闇や消滅まで明るい紫になってしまうので、V は元の色の最大成分をそのまま使う。</p>
+	 */
 	private static float[] vivid(Vector3f color) {
 		float r = color.x();
 		float g = color.y();
@@ -101,11 +115,11 @@ public final class GunElements {
 		if (max <= 0.001f || delta <= 0.001f) return new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		float saturation = Math.max(delta / max, MIN_SATURATION);
-		// HSV の逆算: 明度 1 で ch = 1 - S * (max - ch) / delta ( (max-ch)/delta が色相を決める比 )
+		// HSV の逆算: ch = V * (1 - S * (max - ch) / delta )  ( (max-ch)/delta が色相を決める比、V = max )
 		return new float[] {
-				1.0f - saturation * (max - r) / delta,
-				1.0f - saturation * (max - g) / delta,
-				1.0f - saturation * (max - b) / delta,
+				max * (1.0f - saturation * (max - r) / delta),
+				max * (1.0f - saturation * (max - g) / delta),
+				max * (1.0f - saturation * (max - b) / delta),
 				1.0f };
 	}
 

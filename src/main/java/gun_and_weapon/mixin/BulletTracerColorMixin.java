@@ -54,6 +54,7 @@ public abstract class BulletTracerColorMixin {
 
 	@Unique
 	private float[] gunAndWeapon$elementColor() {
+		if (!gun_and_weapon.config.GunAndWeaponConfig.tracerColor) return null;
 		if (gunAndWeapon$elementResolved) return gunAndWeapon$tracerColor;
 
 		EntityKineticBullet self = (EntityKineticBullet) (Object) this;

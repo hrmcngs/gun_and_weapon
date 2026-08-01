@@ -23,6 +23,7 @@ import net.minecraftforge.fml.common.Mod;
 import the_four_primitives_and_weapons.damage.ElementType;
 
 import gun_and_weapon.GunAndWeaponMod;
+import gun_and_weapon.config.GunAndWeaponConfig;
 import gun_and_weapon.util.GunElements;
 
 /**
@@ -50,30 +51,39 @@ import gun_and_weapon.util.GunElements;
 @Mod.EventBusSubscriber(modid = GunAndWeaponMod.MODID)
 public final class ElementalBulletTrailHandler {
 
-	/** 同時に軌跡を描く弾の上限 (フルオート連射時のパーティクル過多を防ぐ)。 */
-	private static final int MAX_TRACKED_BULLETS = 64;
+	// ===================================================================
+	// 撒く量の設定
+	//
+	// パーティクルは「置いた数 × 生存時間 (約1秒 = 20tick)」がそのまま画面上の粒の数になる。
+	// TACZ はフルオートなら毎 tick 弾が増え、ショットガンは 1 発で十数個のペレットを撒くため、
+	// 1 発あたりの密度を欲張るとすぐ数千個になって描画が重くなる。
+	// ここの値は「軌跡として認識できる最低限」に寄せてある。
+	// ===================================================================
 
-	/** 軌跡上の粒の間隔 (ブロック)。 dust の線ではなくアクセントなので粗めに置く。 */
-	private static final double SAMPLE_STEP = 3.0;
+	/** 同時に軌跡を描く弾の上限。 */
+	private static final int MAX_TRACKED_BULLETS = 16;
+
+	/** 軌跡上の粒の間隔 (ブロック)。 */
+	private static final double SAMPLE_STEP = 6.0;
 
 	/** 1 tick / 1 発あたりのサンプル点の上限。 弾が速すぎる場合は間隔が広がる。 */
-	private static final int MAX_SAMPLES_PER_TICK = 8;
+	private static final int MAX_SAMPLES_PER_TICK = 3;
 
-	/** 1 tick に全弾合計で置く点の目安。 ショットガンのペレットなど同時多発時はここから山分けする。 */
-	private static final int SAMPLE_BUDGET_PER_TICK = 32;
+	/** 1 tick に全弾合計で置く点の上限。 同時多発時はここから山分けする。 */
+	private static final int SAMPLE_BUDGET_PER_TICK = 12;
 
 	/** 山分けしても 1 発あたり最低これだけは置く (完全に消えないように)。 */
-	private static final int MIN_SAMPLES_PER_BULLET = 2;
+	private static final int MIN_SAMPLES_PER_BULLET = 1;
 
 	/** 粒の散布幅 (軌跡が滲みすぎないよう斬撃より控えめ)。 */
 	private static final double SPREAD = 0.05;
 
 	/** 着弾 / 弾切れ時に散らす粒の数と散布幅。 */
-	private static final int IMPACT_COUNT = 4;
+	private static final int IMPACT_COUNT = 3;
 	private static final double IMPACT_SPREAD = 0.15;
 
 	/** 粒を送る距離 (ブロック)。 バニラ既定の 32 では狙撃時に軌跡の先が見えない。 */
-	private static final double VIEW_DISTANCE = 128.0;
+	private static final double VIEW_DISTANCE = 96.0;
 	private static final double VIEW_DISTANCE_SQ = VIEW_DISTANCE * VIEW_DISTANCE;
 
 	/** 血属性のアクセント: レッドストーンブロックの破壊パーティクル ( 赤い破片 )。 */
@@ -81,6 +91,10 @@ public final class ElementalBulletTrailHandler {
 			new BlockParticleOption(ParticleTypes.BLOCK, Blocks.REDSTONE_BLOCK.defaultBlockState());
 
 	private static final List<Trail> TRACKED = new ArrayList<>();
+
+	/** 直近に軌跡を付けた射手と、その tick ( 同じ射撃の 2 発目以降を弾くため )。 */
+	private static int lastShooterId = -1;
+	private static long lastShotTick = Long.MIN_VALUE;
 
 	private ElementalBulletTrailHandler() {}
 
@@ -111,10 +125,17 @@ public final class ElementalBulletTrailHandler {
 
 	@SubscribeEvent
 	public static void onBulletSpawn(EntityJoinLevelEvent event) {
-		if (!(event.getLevel() instanceof ServerLevel)) return;
+		if (!GunAndWeaponConfig.trailParticles) return;
+		if (!(event.getLevel() instanceof ServerLevel level)) return;
 		if (!(event.getEntity() instanceof EntityKineticBullet bullet)) return;
 		if (TRACKED.size() >= MAX_TRACKED_BULLETS) return;
 		if (!(bullet.getOwner() instanceof LivingEntity shooter)) return;
+
+		// 1 回の射撃につき軌跡は 1 本だけ。
+		// ショットガンは 1 発で十数個のペレットを同時に撒くため、全部に軌跡を付けると
+		// 撃つたびにパーティクルが十数倍になって重い ( 見た目もほぼ同じ線に重なる )。
+		long tick = level.getGameTime();
+		if (shooter.getId() == lastShooterId && tick == lastShotTick) return;
 
 		ItemStack gun = GunElements.findGun(shooter, bullet.getGunId());
 		ElementType primary = GunElements.primary(gun);
@@ -124,6 +145,8 @@ public final class ElementalBulletTrailHandler {
 		// 主副とも dust だけの属性なら撒くものが無い (曳光弾の色だけで表現される)。
 		if (!hasAccent(primary) && !hasAccent(secondary)) return;
 
+		lastShooterId = shooter.getId();
+		lastShotTick = tick;
 		TRACKED.add(new Trail(bullet, primary, secondary));
 	}
 
@@ -136,8 +159,9 @@ public final class ElementalBulletTrailHandler {
 		if (event.phase != TickEvent.Phase.END) return;
 		if (TRACKED.isEmpty()) return;
 
+		int budget = Math.min(SAMPLE_BUDGET_PER_TICK, GunAndWeaponConfig.trailBudgetPerTick);
 		int maxSamples = Math.min(MAX_SAMPLES_PER_TICK,
-				Math.max(MIN_SAMPLES_PER_BULLET, SAMPLE_BUDGET_PER_TICK / TRACKED.size()));
+				Math.max(MIN_SAMPLES_PER_BULLET, budget / TRACKED.size()));
 
 		Iterator<Trail> it = TRACKED.iterator();
 		while (it.hasNext()) {
@@ -239,21 +263,12 @@ public final class ElementalBulletTrailHandler {
 		}
 	}
 
-	/** 魂系は 2 種類目を薄く重ねる (MAW の斬撃と同じ組み合わせ)。 */
-	private static ParticleOptions subAccentOf(ElementType type) {
-		if (type == ElementType.SOUL) return ParticleTypes.SCULK_SOUL;
-		if (type == ElementType.SOUL_FIRE) return ParticleTypes.SOUL;
-		return null;
-	}
-
 	private static void emitAccent(ServerLevel level, ElementType type,
 			double x, double y, double z, int count, double spread) {
 		ParticleOptions accent = accentOf(type);
 		if (accent == null) return;
+		// 1 点につき 1 種類だけ。 MAW の斬撃のように 2 種類重ねると弾道では倍の負荷になる。
 		sendLongDistance(level, accent, x, y, z, count, spread);
-
-		ParticleOptions sub = subAccentOf(type);
-		if (sub != null) sendLongDistance(level, sub, x, y, z, Math.max(1, count / 2), spread);
 	}
 
 	/**

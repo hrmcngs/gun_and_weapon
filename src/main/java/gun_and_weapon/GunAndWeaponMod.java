@@ -61,6 +61,12 @@ public class GunAndWeaponMod {
 				buf -> new gun_and_weapon.network.FireModeMessage(buf),
 				(msg, ctx) -> msg.handle(ctx));
 
+		// 属性演出の設定 (config/gun_and_weapon-common.toml)
+		net.minecraftforge.fml.ModLoadingContext.get().registerConfig(
+				net.minecraftforge.fml.config.ModConfig.Type.COMMON,
+				gun_and_weapon.config.GunAndWeaponConfig.SPEC);
+		bus.addListener(gun_and_weapon.config.GunAndWeaponConfig::onLoad);
+
 		// Register MAW (The four primitives and Weapons) special skills
 		bus.addListener((net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent event) ->
 				event.enqueueWork(gun_and_weapon.init.GunAndWeaponSkills::register));

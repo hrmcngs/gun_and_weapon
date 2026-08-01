@@ -100,4 +100,5 @@ bash run_quick.sh        # 手元のjarのまま即起動
   - 原作: [Craftsman Arms データパック](https://github.com/Chuzume/Craftsman_Arms)
   - リソース: Chuzume's Resources
   - ご本人の許諾を得て使用しています (条件: 原作リンクの掲載)
-- MOD化: hrmcn
+- MOD化: hrmcngs
+
