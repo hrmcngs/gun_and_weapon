@@ -35,8 +35,7 @@ Craftsman Gunblade をMODとして再現したものです（ご本人の許諾�
 **3通りのどれでも作れます**（好みの方法でどうぞ）:
 
 ### 1. 通常のクラフト台
-
-![クラフトレシピ](https://raw.githubusercontent.com/hrmcngs/gun_and_weapon/main/image/craftrecipe.png)
+![gunblade](https://raw.githubusercontent.com/hrmcngs/gun_and_weapon/main/image/craftrecipe.png)
 
 ```
   □ ダイヤ 鉄
