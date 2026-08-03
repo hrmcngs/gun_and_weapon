@@ -36,6 +36,8 @@ Craftsman Gunblade をMODとして再現したものです（ご本人の許諾�
 
 ### 1. 通常のクラフト台
 
+![クラフトレシピ](https://raw.githubusercontent.com/hrmcngs/gun_and_weapon/main/image/craftrecipe.png)
+
 ```
   □ ダイヤ 鉄
  火薬 ネザ 鉄     ネザ = ネザライトの欠片

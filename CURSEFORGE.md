@@ -41,6 +41,8 @@ Weapons carrying an element pair alternate both along the trail.
 **Crafting** — choose whichever you like: a **vanilla crafting table** recipe, the
 **Rarity Forge** (The four primitives and Weapons), or the **TACZ Gun Smith Table**.
 
+![Crafting recipe](https://raw.githubusercontent.com/hrmcngs/gun_and_weapon/main/image/craftrecipe.png)
+
 **Requires:** TACZ (Timeless and Classics Zero) 1.1.7+, The four primitives and Weapons
 
 **Credits:** Original Craftsman Gunblade design, model & texture by **Chuzume**.
@@ -71,6 +73,8 @@ Forge 1.20.1 のMODとして再現したものです。
 
 **クラフト** — **通常のクラフト台** / **レアリティ鍛冶**（The four primitives and
 Weapons）/ **TACZ ガンスミステーブル** の3通りのどれでも作成できます。
+
+![クラフトレシピ](https://raw.githubusercontent.com/hrmcngs/gun_and_weapon/main/image/craftrecipe.png)
 
 **前提MOD:** TACZ (Timeless and Classics Zero) 1.1.7+、The four primitives and Weapons
 
