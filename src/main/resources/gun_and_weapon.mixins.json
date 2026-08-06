@@ -9,6 +9,7 @@
   ],
   "client": [
     "AttachmentItemRendererMixin",
+    "BambooPreviewVisibilityMixin",
     "VanillaBambooAttachmentMixin",
     "BulletTracerColorMixin",
     "MuzzleFlashColorMixin",

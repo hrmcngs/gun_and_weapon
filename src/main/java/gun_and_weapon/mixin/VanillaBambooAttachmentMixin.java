@@ -49,35 +49,15 @@ public abstract class VanillaBambooAttachmentMixin {
 		// ストックも植物も、すべて Minecraft 本体の竹ブロックモデルで構成する。
 		poseStack.translate(-0.08, -0.02, -0.14);
 		poseStack.scale(0.21f, 0.21f, 0.21f);
-		// 横倒しの竹を3本束ねて肩当てを作る。
-		renderStockCane(minecraft, buffers, poseStack, stem,
-				-0.55, 0.15, 0.45, 4, -2.0f, light);
-		renderStockCane(minecraft, buffers, poseStack, stem,
-				0.05, -0.5, 0.25, 4, 1.5f, light);
-		renderStockCane(minecraft, buffers, poseStack, stem,
-				0.58, 0.12, 0.4, 4, 3.0f, light);
-		// 銃へ食い込む短い地下茎。左右へ開いて「根を張る」輪郭を作る。
-		renderStockCane(minecraft, buffers, poseStack, stem,
-				-0.35, -0.2, -0.2, 2, -28.0f, light);
-		renderStockCane(minecraft, buffers, poseStack, stem,
-				0.35, -0.25, -0.2, 2, 28.0f, light);
-
-		// 画像のような密生株: 同じ地下茎から高さと傾きの違う竹を生やす。
-		renderColumn(minecraft, buffers, poseStack, stem, smallLeaves, largeLeaves,
-				0.0, 0.0, 0.0, 4, -2.0f, light);
-		renderColumn(minecraft, buffers, poseStack, stem, smallLeaves, largeLeaves,
-				-0.75, -0.15, 0.3, 3, -9.0f, light);
-		renderColumn(minecraft, buffers, poseStack, stem, smallLeaves, largeLeaves,
-				0.68, -0.05, 0.18, 4, 7.0f, light);
-		renderColumn(minecraft, buffers, poseStack, stem, smallLeaves, largeLeaves,
-				-0.12, -0.2, -0.68, 3, 5.0f, light);
-		renderColumn(minecraft, buffers, poseStack, stem, smallLeaves, largeLeaves,
-				0.35, -0.25, 0.72, 2, -12.0f, light);
+		// 一本だけの竹を横向きにし、後半の節からバニラの葉を生やす。
+		renderStockCane(minecraft, buffers, poseStack, stem, smallLeaves, largeLeaves,
+				0.0, -0.15, 0.25, 4, 0.0f, light);
 		poseStack.popPose();
 	}
 
 	private static void renderStockCane(Minecraft minecraft, MultiBufferSource.BufferSource buffers,
-			PoseStack poseStack, BlockState stem, double x, double y, double z,
+			PoseStack poseStack, BlockState stem, BlockState smallLeaves, BlockState largeLeaves,
+			double x, double y, double z,
 			int length, float spread, int light) {
 		poseStack.pushPose();
 		poseStack.translate(x, y, z);
@@ -86,25 +66,9 @@ public abstract class VanillaBambooAttachmentMixin {
 		for (int segment = 0; segment < length; segment++) {
 			poseStack.pushPose();
 			poseStack.translate(0, segment, 0);
-			minecraft.getBlockRenderer().renderSingleBlock(
-					stem, poseStack, buffers, light, OverlayTexture.NO_OVERLAY);
-			poseStack.popPose();
-		}
-		poseStack.popPose();
-	}
-
-	private static void renderColumn(Minecraft minecraft, MultiBufferSource.BufferSource buffers,
-			PoseStack poseStack, BlockState stem, BlockState smallLeaves, BlockState largeLeaves,
-			double x, double y, double z, int height, float lean, int light) {
-		poseStack.pushPose();
-		poseStack.translate(x, y, z);
-		poseStack.mulPose(Axis.ZP.rotationDegrees(lean));
-		for (int level = 0; level < height; level++) {
-			poseStack.pushPose();
-			poseStack.translate(0, level, 0);
-			BlockState state = level == height - 1
+			BlockState state = segment == length - 1
 					? largeLeaves
-					: (level == height - 2 ? smallLeaves : stem);
+					: (segment == length - 2 ? smallLeaves : stem);
 			minecraft.getBlockRenderer().renderSingleBlock(
 					state, poseStack, buffers, light, OverlayTexture.NO_OVERLAY);
 			poseStack.popPose();
