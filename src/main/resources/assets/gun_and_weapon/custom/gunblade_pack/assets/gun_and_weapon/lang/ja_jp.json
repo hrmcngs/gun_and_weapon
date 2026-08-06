@@ -2,5 +2,6 @@
   "tacz.gun.gun_and_weapon.gunblade.name": "ガンブレード（射撃モード）",
   "tacz.gun.gun_and_weapon.gunblade.desc": "刃に銃火器を内蔵。持ち替えキー[F]で近接モードに切替。[R]でリロード。",
   "attachment.gun_and_weapon.speedloader": "スピードローダー",
-  "attachment.gun_and_weapon.speed_strip": "スピードストリップ"
+  "attachment.gun_and_weapon.speed_strip": "スピードストリップ",
+  "attachment.gun_and_weapon.bamboo_shoot_stock": "壁喰い筍ストック"
 }

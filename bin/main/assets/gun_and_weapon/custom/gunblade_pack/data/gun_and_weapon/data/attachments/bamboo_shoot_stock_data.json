@@ -1,0 +1,14 @@
+{
+  "weight": 0.8,
+  "pierce": {
+    "function": "y = x + 3"
+  },
+  "ads": {
+    "addend": 0.04
+  },
+  "recoil": {
+    "pitch": {
+      "multiplier": 0.9
+    }
+  }
+}

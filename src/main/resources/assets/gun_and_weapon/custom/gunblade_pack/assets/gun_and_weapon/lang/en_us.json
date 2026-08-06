@@ -2,5 +2,6 @@
   "tacz.gun.gun_and_weapon.gunblade.name": "Gunblade (Ranged Mode)",
   "tacz.gun.gun_and_weapon.gunblade.desc": "A blade with a built-in firearm. Press [F] (swap-hands key) to switch to melee mode. [R] to reload.",
   "attachment.gun_and_weapon.speedloader": "Speedloader",
-  "attachment.gun_and_weapon.speed_strip": "Speed Strip"
+  "attachment.gun_and_weapon.speed_strip": "Speed Strip",
+  "attachment.gun_and_weapon.bamboo_shoot_stock": "Wall-Eater Bamboo Shoot Stock"
 }

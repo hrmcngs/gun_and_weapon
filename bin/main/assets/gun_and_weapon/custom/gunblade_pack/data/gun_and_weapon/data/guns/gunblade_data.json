@@ -134,7 +134,8 @@
     }
   },
   "allow_attachment_types": [
-    "extended_mag"
+    "extended_mag",
+    "stock"
   ],
   "burst_data": {
     "continuous_shoot": true,

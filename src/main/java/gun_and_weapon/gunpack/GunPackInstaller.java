@@ -48,6 +48,13 @@ public final class GunPackInstaller {
 			"data/gun_and_weapon/index/attachments/speed_strip.json",
 			"data/gun_and_weapon/data/attachments/speed_strip_data.json",
 			"data/gun_and_weapon/recipes/attachments/speed_strip.json",
+			// 筍ストック — stock アタッチメント。テクスチャは手描き用に別ファイル参照。
+			"assets/gun_and_weapon/display/attachments/bamboo_shoot_stock_display.json",
+			"assets/gun_and_weapon/geo_models/attachment/bamboo_shoot_stock.json",
+			"assets/gun_and_weapon/textures/attachment/uv/bamboo_shoot_stock.png",
+			"data/gun_and_weapon/index/attachments/bamboo_shoot_stock.json",
+			"data/gun_and_weapon/data/attachments/bamboo_shoot_stock_data.json",
+			"data/gun_and_weapon/recipes/attachments/bamboo_shoot_stock.json",
 			// アタッチメントの3Dモデル (アイテム表示用)
 			"assets/gun_and_weapon/geo_models/attachment/speedloader.json",
 			"assets/gun_and_weapon/geo_models/attachment/speed_strip.json",

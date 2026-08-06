@@ -1,0 +1,21 @@
+{
+  "materials": [
+    {
+      "item": { "item": "minecraft:bamboo" },
+      "count": 8
+    },
+    {
+      "item": { "item": "minecraft:pointed_dripstone" },
+      "count": 2
+    },
+    {
+      "item": { "tag": "forge:dusts/redstone" },
+      "count": 3
+    }
+  ],
+  "result": {
+    "type": "attachment",
+    "id": "gun_and_weapon:bamboo_shoot_stock"
+  },
+  "type": "tacz:gun_smith_table_crafting"
+}

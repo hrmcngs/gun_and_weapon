@@ -1,0 +1,7 @@
+{
+  "name": "attachment.gun_and_weapon.bamboo_shoot_stock",
+  "display": "gun_and_weapon:bamboo_shoot_stock_display",
+  "data": "gun_and_weapon:bamboo_shoot_stock_data",
+  "type": "stock",
+  "sort": 0
+}
