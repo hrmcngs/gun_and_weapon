@@ -48,10 +48,10 @@ public abstract class VanillaBambooAttachmentMixin {
 		poseStack.pushPose();
 		// ストックも植物も、すべて Minecraft 本体の竹ブロックモデルで構成する。
 		poseStack.translate(-0.08, -0.02, -0.14);
-		poseStack.scale(0.21f, 0.21f, 0.21f);
+		poseStack.scale(0.38f, 0.38f, 0.38f);
 		// 一本だけの竹を横向きにし、後半の節からバニラの葉を生やす。
 		renderStockCane(minecraft, buffers, poseStack, stem, smallLeaves, largeLeaves,
-				0.0, -0.15, 0.25, 4, 0.0f, light);
+				0.0, -0.15, 0.10, 3, 0.0f, light);
 		poseStack.popPose();
 	}
 
@@ -62,7 +62,8 @@ public abstract class VanillaBambooAttachmentMixin {
 		poseStack.pushPose();
 		poseStack.translate(x, y, z);
 		poseStack.mulPose(Axis.YP.rotationDegrees(spread));
-		poseStack.mulPose(Axis.XP.rotationDegrees(90.0f));
+		// stock 接続点から銃の後方へ伸ばす（+90度では銃本体側へ食い込む）。
+		poseStack.mulPose(Axis.XP.rotationDegrees(-90.0f));
 		for (int segment = 0; segment < length; segment++) {
 			poseStack.pushPose();
 			poseStack.translate(0, segment, 0);

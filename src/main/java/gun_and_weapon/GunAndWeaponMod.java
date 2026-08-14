@@ -28,6 +28,19 @@ import net.minecraftforge.common.MinecraftForge;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+
+import com.tacz.guns.api.event.server.AmmoHitBlockEvent;
+import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.api.item.attachment.AttachmentType;
+import com.tacz.guns.entity.EntityKineticBullet;
+import com.tacz.guns.util.EntityUtil;
+import com.tacz.guns.util.TacHitResult;
+
+import gun_and_weapon.mixin.EntityKineticBulletInvoker;
 
 import gun_and_weapon.init.GunAndWeaponItems;
 import gun_and_weapon.init.GunAndWeaponTabs;
@@ -45,6 +58,8 @@ import java.util.AbstractMap;
 public class GunAndWeaponMod {
 	public static final Logger LOGGER = LogManager.getLogger(GunAndWeaponMod.class);
 	public static final String MODID = "gun_and_weapon";
+	private static final ResourceLocation BAMBOO_SHOOT_STOCK =
+			new ResourceLocation(MODID, "bamboo_shoot_stock");
 
 	public GunAndWeaponMod() {
 		MinecraftForge.EVENT_BUS.register(this);
@@ -103,6 +118,42 @@ public class GunAndWeaponMod {
 			});
 			actions.forEach(e -> e.getKey().run());
 			workQueue.removeAll(actions);
+		}
+	}
+
+	/**
+	 * TaCZ の pierce はエンティティ貫通数であり、ブロック貫通には使われない。
+	 * 竹ストックを装着した銃の弾だけブロック命中処理をキャンセルし、弾道を
+	 * そのまま次のtickへ進めることで壁の向こう側へ到達させる。
+	 */
+	@SubscribeEvent
+	public void bambooStockWallPierce(AmmoHitBlockEvent event) {
+		Entity owner = event.getAmmo().getOwner();
+		if (!(owner instanceof LivingEntity living)) return;
+
+		for (InteractionHand hand : InteractionHand.values()) {
+			ItemStack gunStack = living.getItemInHand(hand);
+			IGun gun = IGun.getIGunOrNull(gunStack);
+			if (gun == null || !event.getAmmo().getGunId().equals(gun.getGunId(gunStack))) continue;
+			if (BAMBOO_SHOOT_STOCK.equals(gun.getAttachmentId(gunStack, AttachmentType.STOCK))) {
+				event.setCanceled(true);
+
+				// TaCZ はブロック命中位置でエンティティ探索区間を打ち切るため、
+				// 壁の裏からこのtick本来の終点までを改めて探索する。
+				EntityKineticBullet bullet = event.getAmmo();
+				var movement = bullet.getDeltaMovement();
+				var direction = movement.normalize();
+				var behindWall = event.getHitResult().getLocation().add(direction.scale(0.01));
+				var tickEnd = bullet.position().add(movement);
+				if (behindWall.distanceToSqr(tickEnd) > 1.0E-6) {
+					for (EntityKineticBullet.EntityResult result :
+							EntityUtil.findEntitiesOnPath(bullet, behindWall, tickEnd)) {
+						((EntityKineticBulletInvoker) bullet).gunAndWeapon$invokeOnHitEntity(
+								new TacHitResult(result), behindWall, tickEnd);
+					}
+				}
+				return;
+			}
 		}
 	}
 

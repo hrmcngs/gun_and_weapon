@@ -5,12 +5,11 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "gun_and_weapon.refmap.json",
   "mixins": [
+    "EntityKineticBulletInvoker",
     "UniversalBambooStockMixin"
   ],
   "client": [
     "AttachmentItemRendererMixin",
-    "BambooPreviewVisibilityMixin",
-    "VanillaBambooAttachmentMixin",
     "BulletTracerColorMixin",
     "MuzzleFlashColorMixin",
     "SlotModelColorMixin"

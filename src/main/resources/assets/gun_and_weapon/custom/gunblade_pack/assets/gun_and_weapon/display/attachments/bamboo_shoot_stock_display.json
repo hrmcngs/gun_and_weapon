@@ -1,10 +1,10 @@
 {
   "slot": "tacz:attachment/slot/oem_stock_heavy",
   "model": "gun_and_weapon:attachment/bamboo_shoot_stock",
-  "texture": "gun_and_weapon:attachment/uv/bamboo_shoot_stock",
+  "texture": "minecraft:block/bamboo_stalk",
   "lod": {
     "model": "gun_and_weapon:attachment/bamboo_shoot_stock",
-    "texture": "gun_and_weapon:attachment/uv/bamboo_shoot_stock"
+    "texture": "minecraft:block/bamboo_stalk"
   },
   "sounds": {
     "install": "tacz:attachments/attachment_general_a",

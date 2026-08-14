@@ -1,7 +1,7 @@
 {
   "weight": 0.8,
   "pierce": {
-    "function": "y = x + 3"
+    "function": "y = x + 100"
   },
   "ads": {
     "addend": 0.04

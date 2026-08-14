@@ -28,12 +28,16 @@ import gun_and_weapon.GunAndWeaponMod;
  */
 @Mixin(value = AttachmentItemRenderer.class, remap = false)
 public abstract class AttachmentItemRendererMixin {
+	private static final ResourceLocation BAMBOO_STOCK =
+			new ResourceLocation("gun_and_weapon", "bamboo_shoot_stock");
 
 	/** GUI 内での傾き (バニラのブロックアイテム風の斜め見下ろし) */
 	private static final float GUI_PITCH_DEG = -30f;
 	private static final float GUI_YAW_DEG = 45f;
 	/** スロット内での大きさ。 */
 	private static final float GUI_SCALE = 2.0f;
+	/** 長い竹ストック専用。64pxスロットから葉先がはみ出さない倍率。 */
+	private static final float BAMBOO_GUI_SCALE = 1.25f;
 	/**
 	 * モデル中身の中心位置 (エンティティモデル座標、ブロック単位)。
 	 * Bedrock ジオは y' = 24 - geoY で読み込まれるため、geo原点付近に作った
@@ -57,14 +61,19 @@ public abstract class AttachmentItemRendererMixin {
 			if (model == null || texture == null) return;
 			poseStack.pushPose();
 			// スロット中央 (単位立方体の中心) へ配置
-			poseStack.translate(0.5, 0.5, 0.5);
+			boolean bamboo = BAMBOO_STOCK.equals(id);
+			// 竹は細長く、通常の原点では右上へ外れるため専用の画面位置を使う。
+			poseStack.translate(bamboo ? 0.32 : 0.5, bamboo ? 0.60 : 0.5, 0.5);
 			// Bedrock (y下向き) → GUI (y上向き) の反転 + 拡大
-			poseStack.scale(-GUI_SCALE, -GUI_SCALE, GUI_SCALE);
+			float guiScale = bamboo ? BAMBOO_GUI_SCALE : GUI_SCALE;
+			poseStack.scale(-guiScale, -guiScale, guiScale);
 			// 斜め見下ろし (この時点ではモデル中心が原点に来ているので中心周りに回る)
 			poseStack.mulPose(Axis.XP.rotationDegrees(GUI_PITCH_DEG));
 			poseStack.mulPose(Axis.YP.rotationDegrees(GUI_YAW_DEG));
 			// モデル中身の中心を原点へ引き戻す (最後に書く = 頂点に最初に適用される)
-			poseStack.translate(0, -CONTENT_CENTER_Y, 0);
+			// 長い竹は根元ではなく全長の中央をスロット中央へ合わせる。
+			poseStack.translate(0, -CONTENT_CENTER_Y,
+					bamboo ? -0.57 : 0);
 			model.render(stack, ItemStack.EMPTY, poseStack, ItemDisplayContext.GUI,
 					RenderType.entityCutout(texture), light, overlay);
 			poseStack.popPose();
