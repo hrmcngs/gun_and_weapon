@@ -10,9 +10,11 @@
   ],
   "client": [
     "AttachmentItemRendererMixin",
+    "BambooPreviewVisibilityMixin",
     "BulletTracerColorMixin",
     "MuzzleFlashColorMixin",
-    "SlotModelColorMixin"
+    "SlotModelColorMixin",
+    "VanillaBambooAttachmentMixin"
   ],
   "injectors": {
     "defaultRequire": 0

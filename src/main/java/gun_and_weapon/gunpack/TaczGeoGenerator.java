@@ -66,7 +66,18 @@ public final class TaczGeoGenerator {
 			for (JsonElement ge : groups) {
 				if (!ge.isJsonObject()) continue;
 				JsonObject g = ge.getAsJsonObject();
-				JsonObject b = bone(g.get("name").getAsString(), "gun", 0, 7, 8);
+				String groupName = g.get("name").getAsString();
+				// TaCZ treats `stock` as the attachment render anchor and
+				// `stock_default` as the original geometry to hide while a stock is fitted.
+				// Keeping cubes directly on `stock` makes the OEM shape and attachment
+				// visibility fight each other, so split this group into the two bones.
+				if ("stock".equals(groupName)) {
+					bones.add(bone("stock", "gun", 0, 7, 8));
+				}
+				JsonObject b = bone(
+						"stock".equals(groupName) ? "stock_default" : groupName,
+						"stock".equals(groupName) ? "stock" : "gun",
+						0, 7, 8);
 				JsonArray cubes = new JsonArray();
 				for (JsonElement ch : g.getAsJsonArray("children")) {
 					int idx = ch.getAsInt();
