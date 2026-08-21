@@ -35,6 +35,8 @@ public final class GunbladeClientInput {
 	/** クロスヘア非表示フラグがこの時間 (tick) 立ちっぱなしなら強制解除する。 */
 	private static final int CROSSHAIR_STUCK_TICKS = 40;
 	private static int crosshairHiddenTicks = 0;
+	/** TACZ animation context lookup は毎tick不要。4tickごとに確認してFPS/CPU負荷を抑える。 */
+	private static int crosshairCheckTicker = 0;
 
 	/**
 	 * 射撃モードで左クリックを {@link #BURST_HOLD_TICKS} 以上長押しすると
@@ -78,7 +80,9 @@ public final class GunbladeClientInput {
 			attackHeldTicks = 0;
 		}
 
-		unstickCrosshair(mainHand);
+		if ((++crosshairCheckTicker & 3) == 0) {
+			unstickCrosshair(mainHand);
+		}
 	}
 
 	/**

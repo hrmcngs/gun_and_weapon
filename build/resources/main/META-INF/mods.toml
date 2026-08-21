@@ -4,7 +4,7 @@ license="Academic Free License v3.0"
 
 [[mods]]
 modId="gun_and_weapon"
-version="1.0.6-beta"
+version="1.0.6"
 displayName="Craftsman Gunblade"
 logoFile="logo.png"
 credits="Original Craftsman Gunblade by Chuzume - https://github.com/Chuzume/Craftsman_Arms (used with permission)"
