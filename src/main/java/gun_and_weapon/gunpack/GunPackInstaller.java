@@ -28,6 +28,7 @@ import gun_and_weapon.GunAndWeaponMod;
 public final class GunPackInstaller {
 
 	private static final String RES = "/assets/gun_and_weapon/custom/gunblade_pack/";
+	private static final String KID_GUN_PACK = "/assets/gun_and_weapon/custom/kid_gun_1412.zip";
 	private static final String SWORD_MODEL = "/assets/gun_and_weapon/models/item/gunblade_sword.json";
 	private static final String SWORD_TEXTURE = "/assets/gun_and_weapon/textures/item/gunblade.png";
 	private static final String[] STATIC_FILES = {
@@ -65,6 +66,20 @@ public final class GunPackInstaller {
 	};
 
 	private GunPackInstaller() {}
+
+	/** JARに同梱したKid Gun 1412ガンパックをTaCZフォルダへ展開する。 */
+	private static void installKidGunPack() throws IOException {
+		Path target = FMLPaths.GAMEDIR.get().resolve("tacz").resolve("kid_gun_1412.zip");
+		Files.createDirectories(target.getParent());
+		try (InputStream is = GunPackInstaller.class.getResourceAsStream(KID_GUN_PACK)) {
+			if (is == null) {
+				GunAndWeaponMod.LOGGER.warn("Bundled Kid Gun 1412 pack not found: {}", KID_GUN_PACK);
+				return;
+			}
+			Files.copy(is, target, StandardCopyOption.REPLACE_EXISTING);
+		}
+		GunAndWeaponMod.LOGGER.info("Kid Gun 1412 pack installed: {}", target);
+	}
 
 	/**
 	 * display json を jar のテンプレートから読み、transform.scale の
@@ -111,6 +126,7 @@ public final class GunPackInstaller {
 
 	public static void install() {
 		try {
+			installKidGunPack();
 			Path packDir = FMLPaths.GAMEDIR.get().resolve("tacz").resolve("gunblade_pack");
 
 			// 古い内容を削除して常に作り直す
